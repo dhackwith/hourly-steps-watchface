@@ -17,10 +17,14 @@ foreach ($file in @($validator, $footprint, $apk)) {
     }
 }
 
-java -jar $validator 4 $face
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# Both tools can exit 0 after a failure, so read what they say too.
+$ErrorActionPreference = "Continue"
+$output = (java -jar $validator 4 $face 2>&1 | Out-String)
+Write-Output $output
+if ($LASTEXITCODE -ne 0 -or $output -notmatch "PASSED") { exit 1 }
 
-java -jar $footprint --watch-face $apk --schema-version 4 `
+$output = (java -jar $footprint --watch-face $apk --schema-version 4 `
     --ambient-limit-mb 10 --active-limit-mb 100 `
-    --apply-v1-offload-limitations --estimate-optimization
-exit $LASTEXITCODE
+    --apply-v1-offload-limitations --estimate-optimization 2>&1 | Out-String)
+Write-Output $output
+if ($LASTEXITCODE -ne 0 -or $output -notmatch "has passed") { exit 1 }

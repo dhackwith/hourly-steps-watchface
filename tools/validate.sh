@@ -23,7 +23,19 @@ if [ ! -f "$apk" ]; then
     exit 2
 fi
 
-java -jar "$validator" 4 "$face"
-java -jar "$footprint" --watch-face "$apk" --schema-version 4 \
+# Both tools can exit 0 after a failure, so read what they say too.
+output="$(java -jar "$validator" 4 "$face" 2>&1)" || { echo "$output"; exit 1; }
+echo "$output"
+case "$output" in
+    *PASSED*) ;;
+    *) exit 1 ;;
+esac
+
+output="$(java -jar "$footprint" --watch-face "$apk" --schema-version 4 \
     --ambient-limit-mb 10 --active-limit-mb 100 \
-    --apply-v1-offload-limitations --estimate-optimization
+    --apply-v1-offload-limitations --estimate-optimization 2>&1)" || { echo "$output"; exit 1; }
+echo "$output"
+case "$output" in
+    *"has passed"*) ;;
+    *) exit 1 ;;
+esac

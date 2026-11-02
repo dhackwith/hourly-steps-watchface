@@ -7,6 +7,8 @@
 
     <string name="reader_today">Today\'s steps: %1$s</string>
     <string name="reader_interval">Steps this interval: %1$s</string>
+    <string name="reader_weather">%1$s, %2$s degrees</string>
+    <string name="reader_heart">Heart rate: %1$s</string>
     <string name="reader_time">%1$s:%2$s</string>
 
     <string name="theme_label">Theme</string>

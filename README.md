@@ -6,14 +6,17 @@ time, in the app's seven colour themes.
 - **Outer ring:** today's steps against the daily goal. It turns the theme's goal colour once met.
 - **Inner ring:** this interval's steps against its target.
 - **Numbers:** the interval's steps, "of 584", and "Today 3,100" or "Goal met · 7,040".
-- **Always-on:** thin dim rings, the date, and the time in regular weight at 70 %.
+- **Weather:** an icon for the condition, the current temperature, and today's low / high.
+- **Heart rate:** the watch's latest reading.
+- **Always-on:** thin dim rings, the date, and the time in regular weight at 70 %. Weather, heart rate
+  and the step numbers are hidden.
 - **Tap a ring** to open Hourly Steps.
 
 ![The seven themes](demo/themes.png)
 
 It is a [Watch Face Format](https://developer.android.com/training/wearables/wff) v4 face: only XML
-and images, no code. One 450 × 450 design scales to both watch sizes (41 mm 408 × 408, 45 mm
-456 × 456). It needs Wear OS 6 (API 36).
+and images, no code. One 450 × 450 design scales to the watch's screen, whatever its size. It needs
+Wear OS 6 (API 36) or later.
 
 ## The app
 
@@ -32,6 +35,16 @@ app, it keeps the fallback below until you remove and re-add it, or pick the sou
 
 The numbers update when the app sends them: at most once a minute while you walk and every 5 minutes
 otherwise, the same as the app's tile.
+
+## Weather and heart rate
+
+These come from the watch itself, so they work with or without the app. Weather needs the watch to
+know where it is, from the paired phone or the network. Until it has data the weather row is hidden,
+and until it has a reading heart rate shows `--`. Temperatures use the unit set on the watch.
+
+All 16 weather conditions the format defines have an icon, with a sun or moon to match day or night:
+
+![Weather icons by condition number](demo/weather-icons.png)
 
 ## Themes
 
@@ -137,6 +150,10 @@ scroll --axis SCROLL,-1`, and renderer errors show up here:
 adb logcat --pid=$(adb shell pidof -s com.google.wear.watchface.runtime)
 ```
 
+The emulators have no weather source and report a heart rate of 0, so these two only show live data
+on a real watch. To test their layout, temporarily replace the `[WEATHER.*]` and `[HEART_RATE]`
+sources in `watchface.xml` with fixed values, and put them back before committing.
+
 Three things on the renderer that the XML schema doesn't catch:
 
 - A `ColorConfiguration` with a single option fails to parse and every colour turns white.
@@ -144,13 +161,21 @@ Three things on the renderer that the XML schema doesn't catch:
   true at once leave stale content. Keep them mutually exclusive.
 - Text inside `Font` keeps its surrounding whitespace, which pushes it off centre.
 
+Google's validator also exits 0 when a face is invalid, so `validateWatchFace` and `tools/validate.*`
+read its output as well as its exit code.
+
 ## Limits
 
 - The face can't tell how long an interval is, so it says "of 584", not "of 584 this hour".
 - The system step counter is text only, so without the app the ring comes from `[STEP_PERCENT]`.
-  That reads 0 on the emulators, so this one ring is only proven on a real watch.
-- The always-on rings are dimmed by alpha, and text and rings are vector, so the only bitmaps are the
-  preview and the flavor icons.
+  That reads 0 on the emulators, so this ring still needs checking on a real watch with the app removed.
+- Rings and text are vector. The only bitmaps are the preview, the flavor icons and the weather and
+  heart icons.
+
+## Credits
+
+The weather icons are from Google's [Wear OS samples](https://github.com/android/wear-os-samples/tree/main/WatchFaceFormat/Weather),
+under the Apache License 2.0 ([LICENSE-weather-icons.txt](LICENSE-weather-icons.txt)).
 
 ## Requests for the app
 
@@ -162,4 +187,6 @@ Not needed for this face to work, but they would improve it:
 
 ## Demo
 
-Screenshots in [demo/](demo/) are from the two emulators.
+Screenshots in [demo/](demo/) are from the two emulators. The theme, preview and `large-active` /
+`small-active` shots use sample weather and step numbers. The `large-goal-met`, `-paused`, `-off` and
+`-outside-window-24h` shots are live app states from before the weather row was added.

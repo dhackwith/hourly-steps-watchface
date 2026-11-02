@@ -3,6 +3,46 @@
     <Metadata key="CLOCK_TYPE" value="DIGITAL" />
     <Metadata key="PREVIEW_TIME" value="10:08:00" />
 
+    <!-- Weather icons, indexed by [WEATHER.CONDITION] so every condition is covered. -->
+    <BitmapFonts>
+        <BitmapFont name="weather_day">
+            <Character name="0" resource="ic_unknown" width="96" height="96" />
+            <Character name="1" resource="ic_sunny" width="96" height="96" />
+            <Character name="2" resource="ic_cloudy" width="96" height="96" />
+            <Character name="3" resource="ic_fog" width="96" height="96" />
+            <Character name="4" resource="ic_heavy_rain" width="96" height="96" />
+            <Character name="5" resource="ic_heavy_snow" width="96" height="96" />
+            <Character name="6" resource="ic_rain" width="96" height="96" />
+            <Character name="7" resource="ic_snow" width="96" height="96" />
+            <Character name="8" resource="ic_sunny" width="96" height="96" />
+            <Character name="9" resource="ic_thunderstorm" width="96" height="96" />
+            <Word name="10" resource="ic_sleet" width="96" height="96" />
+            <Word name="11" resource="ic_snow" width="96" height="96" />
+            <Word name="12" resource="ic_rain" width="96" height="96" />
+            <Word name="13" resource="ic_fog" width="96" height="96" />
+            <Word name="14" resource="ic_partly_cloudy_day" width="96" height="96" />
+            <Word name="15" resource="ic_windy" width="96" height="96" />
+        </BitmapFont>
+        <BitmapFont name="weather_night">
+            <Character name="0" resource="ic_unknown" width="96" height="96" />
+            <Character name="1" resource="ic_clear" width="96" height="96" />
+            <Character name="2" resource="ic_cloudy" width="96" height="96" />
+            <Character name="3" resource="ic_fog" width="96" height="96" />
+            <Character name="4" resource="ic_heavy_rain" width="96" height="96" />
+            <Character name="5" resource="ic_heavy_snow" width="96" height="96" />
+            <Character name="6" resource="ic_rain" width="96" height="96" />
+            <Character name="7" resource="ic_snow" width="96" height="96" />
+            <Character name="8" resource="ic_clear" width="96" height="96" />
+            <Character name="9" resource="ic_thunderstorm" width="96" height="96" />
+            <Word name="10" resource="ic_sleet" width="96" height="96" />
+            <Word name="11" resource="ic_snow" width="96" height="96" />
+            <Word name="12" resource="ic_rain" width="96" height="96" />
+            <Word name="13" resource="ic_fog" width="96" height="96" />
+            <Word name="14" resource="ic_partly_cloudy_night" width="96" height="96" />
+            <Word name="15" resource="ic_windy" width="96" height="96" />
+        </BitmapFont>
+    </BitmapFonts>
+
     <UserConfigurations>
         <!-- Colours in the fixed order today, slot, goalMet, track. Keep every option equal to
              AppTheme.kt in the Hourly Steps app; the README has the parity table.
@@ -311,7 +351,7 @@
         <!-- Date. -->
         <Group name="date" x="0" y="0" width="450" height="450">
             <Variant mode="AMBIENT" target="alpha" value="178" />
-            <PartText x="0" y="60" width="450" height="30">
+            <PartText x="0" y="52" width="450" height="30">
                 <Text align="CENTER">
                     <Font family="SYNC_TO_DEVICE" size="22" letterSpacing="0.08" color="#FFCAC4D0">
                         <Upper>
@@ -320,6 +360,98 @@
                                 <Parameter expression="[DAY]" />
                             </Template>
                         </Upper>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
+        <!-- Weather: condition icon, current temperature, then today's low / high. Hidden while the
+             watch has no weather data, and always-on. -->
+        <Group name="weather" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="hasWeather">[WEATHER.IS_AVAILABLE]</Expression>
+                </Expressions>
+                <Compare expression="hasWeather">
+                    <Group name="weatherRow" x="0" y="0" width="450" height="450">
+                        <ScreenReader stringId="reader_weather">
+                            <Parameter expression="[WEATHER.CONDITION_NAME]" />
+                            <Parameter expression="[WEATHER.TEMPERATURE]" />
+                        </ScreenReader>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="isDay">[WEATHER.IS_DAY]</Expression>
+                            </Expressions>
+                            <Compare expression="isDay">
+                            <PartText x="136" y="89" width="36" height="36">
+                                <Text align="CENTER">
+                                    <BitmapFont family="weather_day" size="36">
+                                        <Template><![CDATA[%s]]>
+                                            <Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" />
+                                        </Template>
+                                    </BitmapFont>
+                                </Text>
+                            </PartText>
+                            </Compare>
+                            <Default>
+                            <PartText x="136" y="89" width="36" height="36">
+                                <Text align="CENTER">
+                                    <BitmapFont family="weather_night" size="36">
+                                        <Template><![CDATA[%s]]>
+                                            <Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" />
+                                        </Template>
+                                    </BitmapFont>
+                                </Text>
+                            </PartText>
+                            </Default>
+                        </Condition>
+                        <PartText x="172" y="89" width="64" height="36">
+                            <Text align="CENTER">
+                                <Font family="SYNC_TO_DEVICE" size="28" weight="BOLD" color="#FFFFFFFF">
+                                    <Template><![CDATA[%d°]]>
+                                        <Parameter expression="[WEATHER.TEMPERATURE]" />
+                                    </Template>
+                                </Font>
+                            </Text>
+                        </PartText>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="hasToday">[WEATHER.DAYS.0.IS_AVAILABLE]</Expression>
+                            </Expressions>
+                            <Compare expression="hasToday">
+                                <PartText x="238" y="89" width="110" height="36">
+                                    <Text align="START">
+                                        <Font family="SYNC_TO_DEVICE" size="18" color="#FFCAC4D0">
+                                            <Template><![CDATA[%d° / %d°]]>
+                                                <Parameter expression="[WEATHER.DAYS.0.TEMPERATURE_LOW]" />
+                                                <Parameter expression="[WEATHER.DAYS.0.TEMPERATURE_HIGH]" />
+                                            </Template>
+                                        </Font>
+                                    </Text>
+                                </PartText>
+                            </Compare>
+                        </Condition>
+                    </Group>
+                </Compare>
+            </Condition>
+        </Group>
+
+        <!-- Heart rate, with dashes until the watch has a reading. Hidden always-on. -->
+        <Group name="heartRate" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <ScreenReader stringId="reader_heart">
+                <Parameter expression="[HEART_RATE_Z]" />
+            </ScreenReader>
+            <PartImage x="192" y="372" width="22" height="22">
+                <Image resource="ic_heart" />
+            </PartImage>
+            <PartText x="219" y="368" width="70" height="30">
+                <Text align="START">
+                    <Font family="SYNC_TO_DEVICE" size="22" weight="BOLD" color="#FFFFFFFF">
+                        <Template><![CDATA[%s]]>
+                            <Parameter expression="round([HEART_RATE]) &gt; 0 ? numberFormat(&quot;#&quot;, round([HEART_RATE])) : &quot;--&quot;" />
+                        </Template>
                     </Font>
                 </Text>
             </PartText>
@@ -367,7 +499,7 @@
                 </Expressions>
                 <Compare expression="twelveHour">
                     <PartText x="372" y="210" width="40" height="26">
-                        <Transform target="x" value="[HOUR_1_12] &gt;= 10 ? 372 : 342" />
+                        <Transform target="x" value="[HOUR_1_12] &gt;= 10 ? 372 : 346" />
                         <Text align="START">
                             <Font family="SYNC_TO_DEVICE" size="20" color="#FFFFFFFF">
                                 <Template><![CDATA[%s]]>
