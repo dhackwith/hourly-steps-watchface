@@ -6,6 +6,7 @@ time, in the app's seven colour themes.
 - **Outer ring:** today's steps against the daily goal. It turns the theme's goal colour once met.
 - **Inner ring:** this interval's steps against its target.
 - **Numbers:** the interval's steps, "of 584", and "Today 3,100" or "Goal met · 7,040".
+- **Reminder segments (optional):** the outer ring cut into one segment per reminder.
 - **Weather:** an icon for the condition, the current temperature, and today's low / high.
 - **Heart rate:** the watch's latest reading.
 - **Always-on:** thin dim rings, the date, and the time in regular weight at 70 %. Weather, heart rate
@@ -45,6 +46,22 @@ and until it has a reading heart rate shows `--`. Temperatures use the unit set 
 All 16 weather conditions the format defines have an icon, with a sun or moon to match day or night:
 
 ![Weather icons by condition number](demo/weather-icons.png)
+
+## Reminder segments
+
+An optional setting cuts the outer ring into one segment per reminder, so 12 reminders give 12
+segments. Turn it on in the watch face editor: long-press the face, tap the edit button, swipe to
+**Other options** and switch on **Reminder segments**. It is off by default.
+
+The face works the count out from the app's numbers: the daily goal over the interval target, rounded
+up, so it follows your interval and plan without any setting of its own. It has room for 48 segments,
+a whole day of half-hour reminders. 6, 12 and 24 have been tested on the emulators.
+
+The ring is plain when there is no count to work out: outside the reminder window, while paused or on
+a day off, or without the app. It is also plain once the daily goal is met, a solid ring in the goal
+colour, because the app may then send a different target.
+
+![12 segments](demo/large-segments-12.png) ![24 segments](demo/large-segments-24.png)
 
 ## Themes
 
@@ -184,6 +201,10 @@ Not needed for this face to work, but they would improve it:
 1. **Put the interval's wording in the title.** `RangedValueComplicationData` is built without a
    title, so the face builds "of 584" from the max. With `setTitle("of 584 this hour")` on the
    interval source the face could use the real wording for 30 min and 2 h intervals.
+2. **Keep sending the interval target outside the reminder window.** The interval source sends 0 / 1
+   then, so reminder segments disappear after the last reminder of the day. With the real target as
+   the max and `--` as the text, the face could keep them showing all day. The face would also need a
+   small change: it treats a max above 1 as active, and would have to check for `--` as well.
 
 ## Demo
 

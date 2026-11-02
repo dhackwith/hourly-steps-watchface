@@ -56,6 +56,7 @@
             <ColorOption id="5" displayName="theme_rose" colors="#FFC2DC #FF6FA8 #FFE082 #36252E" />
             <ColorOption id="6" displayName="theme_graphite" colors="#EEEEEE #90A4AE #FFD54F #2A2C2E" />
         </ColorConfiguration>
+        <BooleanConfiguration id="ringSegments" displayName="segments_label" screenReaderText="segments_label" defaultValue="FALSE" />
         <Flavors defaultValue="violet">
             <Flavor id="violet" displayName="theme_violet" icon="flavor_violet">
                 <Configuration id="themeColor" optionId="0" />
@@ -99,6 +100,13 @@
             </ScreenReader>
 
             <Complication type="RANGED_VALUE">
+                <!-- Publishes the number of segments: the goal over the interval target, rounded up
+                     because the app rounds each target up. None once the goal is met, when the app
+                     may send a different target, or while there is no target. Draws nothing. -->
+                <Group name="segmentCountSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="([REFERENCE.intervalTarget] &gt; 1 &amp;&amp; [COMPLICATION.RANGED_VALUE_MAX] &gt; 1 &amp;&amp; [COMPLICATION.RANGED_VALUE_VALUE] &lt; [COMPLICATION.RANGED_VALUE_MAX]) ? ceil([COMPLICATION.RANGED_VALUE_MAX] / [REFERENCE.intervalTarget]) : 0" />
+                    <Reference name="segments" source="x" defaultValue="0" />
+                </Group>
                 <Group name="todayInteractive" x="0" y="0" width="450" height="450">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
                     <PartDraw x="0" y="0" width="450" height="450">
@@ -137,7 +145,8 @@
                                 <Transform target="alpha" value="[COMPLICATION.RANGED_VALUE_VALUE] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
                                 <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="0">
                                     <Stroke thickness="14" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
-                                    <Transform target="endAngle" value="360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
+                                    <Transform target="startAngle" value="[REFERENCE.shownSegments] &gt; 1 ? 2.41 : 0" />
+                                    <Transform target="endAngle" value="([REFERENCE.shownSegments] &gt; 1 &amp;&amp; 360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1) &lt; 2.41) ? 2.41 : 360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
                                 </Arc>
                             </PartDraw>
                             <PartText x="0" y="335" width="450" height="32">
@@ -171,7 +180,8 @@
                                 <Transform target="alpha" value="[COMPLICATION.RANGED_VALUE_VALUE] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
                                 <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="0">
                                     <Stroke thickness="6" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
-                                    <Transform target="endAngle" value="360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
+                                    <Transform target="startAngle" value="[REFERENCE.shownSegments] &gt; 1 ? 1.34 : 0" />
+                                    <Transform target="endAngle" value="([REFERENCE.shownSegments] &gt; 1 &amp;&amp; 360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1) &lt; 1.34) ? 1.34 : 360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
                                 </Arc>
                             </PartDraw>
                         </Compare>
@@ -246,6 +256,11 @@
             </ScreenReader>
 
             <Complication type="RANGED_VALUE">
+                <!-- Publishes the interval target for the today ring's segments. Draws nothing. -->
+                <Group name="intervalTargetSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_MAX]" />
+                    <Reference name="intervalTarget" source="x" defaultValue="0" />
+                </Group>
                 <Group name="intervalInteractive" x="0" y="0" width="410" height="410">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
                     <PartDraw x="0" y="0" width="410" height="410">
@@ -348,6 +363,355 @@
             </Complication>
         </ComplicationSlot>
 
+        <!-- Optional reminder segments: black gaps cut across the outer ring, one per reminder. -->
+        <BooleanConfiguration id="ringSegments">
+            <BooleanOption id="TRUE">
+                <Group name="ringSegments" x="0" y="0" width="450" height="450">
+                    <!-- The count, only while segments are on, for the today ring's start. Draws nothing. -->
+                    <Group name="shownSegmentsSource" x="0" y="0" width="1" height="1">
+                        <Transform target="x" value="[REFERENCE.segments]" />
+                        <Reference name="shownSegments" source="x" defaultValue="0" />
+                    </Group>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 0 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 0 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 1 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 1 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 2 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 2 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 3 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 3 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 4 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 4 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 5 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 5 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 6 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 6 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 7 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 7 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 8 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 8 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 9 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 9 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 10 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 10 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 11 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 11 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 12 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 12 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 13 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 13 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 14 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 14 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 15 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 15 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 16 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 16 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 17 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 17 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 18 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 18 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 19 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 19 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 20 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 20 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 21 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 21 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 22 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 22 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 23 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 23 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 24 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 24 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 25 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 25 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 26 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 26 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 27 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 27 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 28 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 28 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 29 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 29 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 30 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 30 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 31 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 31 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 32 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 32 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 33 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 33 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 34 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 34 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 35 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 35 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 36 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 36 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 37 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 37 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 38 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 38 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 39 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 39 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 40 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 40 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 41 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 41 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 42 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 42 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 43 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 43 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 44 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 44 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 45 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 45 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 46 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 46 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="450">
+                        <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 &amp;&amp; [REFERENCE.segments] &gt; 47 ? 255 : 0" />
+                        <Transform target="angle" value="[REFERENCE.segments] &gt; 1 ? 47 * 360 / [REFERENCE.segments] : 0" />
+                        <Line startX="225" startY="1" endX="225" endY="24">
+                            <Stroke thickness="4" color="#FF000000" />
+                        </Line>
+                    </PartDraw>
+                </Group>
+            </BooleanOption>
+        </BooleanConfiguration>
+
         <!-- Date. -->
         <Group name="date" x="0" y="0" width="450" height="450">
             <Variant mode="AMBIENT" target="alpha" value="178" />
@@ -443,7 +807,7 @@
             <ScreenReader stringId="reader_heart">
                 <Parameter expression="[HEART_RATE_Z]" />
             </ScreenReader>
-            <PartImage x="192" y="372" width="22" height="22">
+            <PartImage x="192" y="372" width="22" height="22" alpha="168" tintColor="[CONFIGURATION.themeColor.1]">
                 <Image resource="ic_heart" />
             </PartImage>
             <PartText x="219" y="368" width="70" height="30">

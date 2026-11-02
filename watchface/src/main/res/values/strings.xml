@@ -11,6 +11,8 @@
     <string name="reader_heart">Heart rate: %1$s</string>
     <string name="reader_time">%1$s:%2$s</string>
 
+    <string name="segments_label">Reminder segments</string>
+
     <string name="theme_label">Theme</string>
     <string name="theme_violet">Violet</string>
     <string name="theme_classic">Classic</string>
