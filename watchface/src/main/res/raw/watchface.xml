@@ -2,10 +2,224 @@
 <WatchFace width="450" height="450" clipShape="CIRCLE">
     <Metadata key="CLOCK_TYPE" value="DIGITAL" />
     <Metadata key="PREVIEW_TIME" value="10:08:00" />
+
+    <UserConfigurations>
+        <!-- Colours in the fixed order today, slot, goalMet, track. Keep every option equal to
+             AppTheme.kt in the Hourly Steps app; the README has the parity table.
+             The renderer can't parse a colour list with a single option, and only takes numeric ids. -->
+        <ColorConfiguration id="themeColor" displayName="theme_label" screenReaderText="theme_label" defaultValue="0">
+            <ColorOption id="0" displayName="theme_violet" colors="#E3D2FF #A98BFF #FFCC80 #2D2640" />
+            <ColorOption id="1" displayName="theme_classic" colors="#D0BCFF #4DD0E1 #FFCC80 #2E2A36" />
+            <ColorOption id="2" displayName="theme_ocean" colors="#90CAF9 #2DD4BF #FFE082 #1C2C36" />
+            <ColorOption id="3" displayName="theme_forest" colors="#9CD6A0 #D4E157 #FFD54F #22302A" />
+            <ColorOption id="4" displayName="theme_sunset" colors="#FF9E80 #FFC44D #FFF176 #36281F" />
+            <ColorOption id="5" displayName="theme_rose" colors="#FFC2DC #FF6FA8 #FFE082 #36252E" />
+            <ColorOption id="6" displayName="theme_graphite" colors="#EEEEEE #90A4AE #FFD54F #2A2C2E" />
+        </ColorConfiguration>
+    </UserConfigurations>
+
     <Scene backgroundColor="#FF000000">
-        <PartText x="0" y="130" width="450" height="130">
+
+        <!-- Outer ring: today's steps against the daily goal. -->
+        <ComplicationSlot x="0" y="0" width="450" height="450" slotId="1" displayName="slot_today"
+            supportedTypes="RANGED_VALUE SHORT_TEXT EMPTY" isCustomizable="TRUE">
+            <DefaultProviderPolicy
+                primaryProvider="com.hourlysteps/com.hourlysteps.surfaces.TodayComplicationService"
+                primaryProviderType="RANGED_VALUE"
+                defaultSystemProvider="STEP_COUNT"
+                defaultSystemProviderType="SHORT_TEXT" />
+            <BoundingOval x="0" y="0" width="450" height="450" />
+
+            <Complication type="RANGED_VALUE">
+                <PartDraw x="0" y="0" width="450" height="450">
+                    <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="360">
+                        <Stroke thickness="14" color="[CONFIGURATION.themeColor.3]" />
+                    </Arc>
+                </PartDraw>
+                <Condition>
+                    <Expressions>
+                        <!-- The app sends 0 / 1 when there is nothing to show, so a real range has max above 1. -->
+                        <Expression name="goalMet"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && [COMPLICATION.RANGED_VALUE_VALUE] >= [COMPLICATION.RANGED_VALUE_MAX]]]></Expression>
+                        <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1]]></Expression>
+                    </Expressions>
+                    <Compare expression="goalMet">
+                        <PartDraw x="0" y="0" width="450" height="450">
+                            <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="360">
+                                <Stroke thickness="14" color="[CONFIGURATION.themeColor.2]" cap="ROUND" />
+                            </Arc>
+                        </PartDraw>
+                        <PartText x="0" y="335" width="450" height="32">
+                            <Text align="CENTER">
+                                <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.2]">
+                                    <Template><![CDATA[Goal met · %s]]>
+                                        <Parameter expression="[COMPLICATION.TEXT]" />
+                                    </Template>
+                                </Font>
+                            </Text>
+                        </PartText>
+                    </Compare>
+                    <Compare expression="active">
+                        <PartDraw x="0" y="0" width="450" height="450">
+                            <Transform target="alpha" value="[COMPLICATION.RANGED_VALUE_VALUE] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
+                            <!-- Above zero only, or the round cap leaves a dot at 12 o'clock. -->
+                            <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="0">
+                                <Stroke thickness="14" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
+                                <Transform target="endAngle" value="360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
+                            </Arc>
+                        </PartDraw>
+                        <PartText x="0" y="335" width="450" height="32">
+                            <Text align="CENTER">
+                                <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.0]">
+                                    <Template><![CDATA[Today %s]]>
+                                        <Parameter expression="[COMPLICATION.TEXT]" />
+                                    </Template>
+                                </Font>
+                            </Text>
+                        </PartText>
+                    </Compare>
+                </Condition>
+            </Complication>
+
+            <!-- A text-only source, which is also what the system step counter sends: the text comes
+                 from the source and the ring from the watch's own step goal. -->
+            <Complication type="SHORT_TEXT">
+                <PartDraw x="0" y="0" width="450" height="450">
+                    <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="360">
+                        <Stroke thickness="14" color="[CONFIGURATION.themeColor.3]" />
+                    </Arc>
+                </PartDraw>
+                <PartDraw x="0" y="0" width="450" height="450">
+                    <Transform target="alpha" value="[STEP_PERCENT] &gt; 0 ? 255 : 0" />
+                    <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="0">
+                        <Stroke thickness="14" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
+                        <Transform target="endAngle" value="3.6 * clamp([STEP_PERCENT], 0, 100)" />
+                    </Arc>
+                </PartDraw>
+                <PartText x="0" y="335" width="450" height="32">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.0]">
+                            <Template><![CDATA[%s %s]]>
+                                <Parameter expression="[COMPLICATION.TEXT]" />
+                                <Parameter expression="[COMPLICATION.TITLE]" />
+                            </Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+
+            <Complication type="EMPTY">
+                <PartDraw x="0" y="0" width="450" height="450">
+                    <Arc centerX="225" centerY="225" width="428" height="428" startAngle="0" endAngle="360">
+                        <Stroke thickness="14" color="[CONFIGURATION.themeColor.3]" />
+                    </Arc>
+                </PartDraw>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Inner ring: this interval's steps against its target. -->
+        <ComplicationSlot x="20" y="20" width="410" height="410" slotId="2" displayName="slot_interval"
+            supportedTypes="RANGED_VALUE SHORT_TEXT EMPTY" isCustomizable="TRUE">
+            <DefaultProviderPolicy
+                primaryProvider="com.hourlysteps/com.hourlysteps.surfaces.SlotComplicationService"
+                primaryProviderType="RANGED_VALUE"
+                defaultSystemProvider="EMPTY"
+                defaultSystemProviderType="EMPTY" />
+            <BoundingOval x="0" y="0" width="410" height="410" />
+
+            <Complication type="RANGED_VALUE">
+                <PartDraw x="0" y="0" width="410" height="410">
+                    <Arc centerX="205" centerY="205" width="388" height="388" startAngle="0" endAngle="360">
+                        <Stroke thickness="12" color="[CONFIGURATION.themeColor.3]" />
+                    </Arc>
+                </PartDraw>
+                <PartText x="0" y="235" width="410" height="50">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
+                            <Template><![CDATA[%s]]>
+                                <Parameter expression="[COMPLICATION.TEXT]" />
+                            </Template>
+                        </Font>
+                    </Text>
+                </PartText>
+                <Condition>
+                    <Expressions>
+                        <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1]]></Expression>
+                    </Expressions>
+                    <Compare expression="active">
+                        <PartDraw x="0" y="0" width="410" height="410">
+                            <Transform target="alpha" value="[COMPLICATION.RANGED_VALUE_VALUE] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
+                            <Arc centerX="205" centerY="205" width="388" height="388" startAngle="0" endAngle="0">
+                                <Stroke thickness="12" color="[CONFIGURATION.themeColor.1]" cap="ROUND" />
+                                <Transform target="endAngle" value="360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
+                            </Arc>
+                        </PartDraw>
+                        <PartText x="0" y="284" width="410" height="30">
+                            <Text align="CENTER">
+                                <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.1]">
+                                    <Template><![CDATA[of %s]]>
+                                        <Parameter expression="numberFormat(&quot;#,###&quot;, [COMPLICATION.RANGED_VALUE_MAX])" />
+                                    </Template>
+                                </Font>
+                            </Text>
+                        </PartText>
+                    </Compare>
+                </Condition>
+            </Complication>
+
+            <Complication type="SHORT_TEXT">
+                <PartDraw x="0" y="0" width="410" height="410">
+                    <Arc centerX="205" centerY="205" width="388" height="388" startAngle="0" endAngle="360">
+                        <Stroke thickness="12" color="[CONFIGURATION.themeColor.3]" />
+                    </Arc>
+                </PartDraw>
+                <PartText x="0" y="235" width="410" height="50">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
+                            <Template><![CDATA[%s]]>
+                                <Parameter expression="[COMPLICATION.TEXT]" />
+                            </Template>
+                        </Font>
+                    </Text>
+                </PartText>
+                <PartText x="0" y="284" width="410" height="30">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.1]">
+                            <Template><![CDATA[%s]]>
+                                <Parameter expression="[COMPLICATION.TITLE]" />
+                            </Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+
+            <!-- No source, which is what you get without the app: hide the ring and say what's missing. -->
+            <Complication type="EMPTY">
+                <PartText x="0" y="235" width="410" height="50">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="18" color="#FFCAC4D0">Add Hourly Steps</Font>
+                    </Text>
+                </PartText>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Date. -->
+        <PartText x="0" y="60" width="450" height="30">
             <Text align="CENTER">
-                <Font family="SYNC_TO_DEVICE" size="120" weight="BOLD" color="#FFFFFFFF">
+                <Font family="SYNC_TO_DEVICE" size="22" letterSpacing="0.08" color="#FFCAC4D0">
+                    <Upper>
+                        <Template><![CDATA[%s %d]]>
+                            <Parameter expression="[DAY_OF_WEEK_S]" />
+                            <Parameter expression="[DAY]" />
+                        </Template>
+                    </Upper>
+                </Font>
+            </Text>
+        </PartText>
+
+        <!-- Time: no leading zero in 12 hour mode, HH:MM in 24 hour mode. -->
+        <PartText x="0" y="128" width="450" height="130">
+            <Text align="CENTER">
+                <Font family="SYNC_TO_DEVICE" size="116" weight="BOLD" color="#FFFFFFFF">
                     <Template><![CDATA[%s:%s]]>
                         <Parameter expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12]" />
                         <Parameter expression="[MINUTE_Z]" />
@@ -13,5 +227,24 @@
                 </Font>
             </Text>
         </PartText>
+
+        <!-- AM/PM follows the time's right edge, which moves in with a one digit hour. -->
+        <Condition>
+            <Expressions>
+                <Expression name="twelveHour"><![CDATA[![IS_24_HOUR_MODE]]]></Expression>
+            </Expressions>
+            <Compare expression="twelveHour">
+                <PartText x="372" y="210" width="40" height="26">
+                    <Transform target="x" value="[HOUR_1_12] &gt;= 10 ? 372 : 342" />
+                    <Text align="START">
+                        <Font family="SYNC_TO_DEVICE" size="20" color="#FFFFFFFF">
+                            <Template><![CDATA[%s]]>
+                                <Parameter expression="[AMPM_STRING]" />
+                            </Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Compare>
+        </Condition>
     </Scene>
 </WatchFace>
