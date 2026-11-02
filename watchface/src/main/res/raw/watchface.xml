@@ -102,13 +102,14 @@
             <Complication type="RANGED_VALUE">
                 <!-- The app sends its numbers at most once a minute, but the watch's own count moves every
                      second or two while walking, so the total and the ring follow whichever is ahead.
-                     The app's value is capped at the goal and these reference values draw nothing. -->
+                     The system rejects a value above the max, so past it the app caps the value and takes
+                     the min below zero: value - min is always the true count. Draws nothing. -->
                 <Group name="todayLiveSource" x="0" y="0" width="1" height="1">
-                    <Transform target="x" value="[STEP_COUNT] &gt; [COMPLICATION.RANGED_VALUE_VALUE] ? [STEP_COUNT] : [COMPLICATION.RANGED_VALUE_VALUE]" />
+                    <Transform target="x" value="[STEP_COUNT] &gt; ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? [STEP_COUNT] : ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN])" />
                     <Reference name="todayLive" source="x" defaultValue="0" />
                 </Group>
                 <Group name="todayAppSource" x="0" y="0" width="1" height="1">
-                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_VALUE]" />
+                    <Transform target="x" value="([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN])" />
                     <Reference name="todayApp" source="x" defaultValue="0" />
                 </Group>
                 <Group name="todayGoalSource" x="0" y="0" width="1" height="1">
@@ -150,13 +151,13 @@
                                 <Text align="CENTER">
                                     <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="[CONFIGURATION.themeColor.2]">
                                         <Template><![CDATA[%s]]>
-                                            <Parameter expression="[STEP_COUNT] &gt;= [COMPLICATION.RANGED_VALUE_VALUE] ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]" />
+                                            <Parameter expression="[STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]" />
                                         </Template>
                                     </Font>
                                 </Text>
                             </PartText>
                             <PartImage x="148" y="268" width="28" height="28" alpha="168" tintColor="[CONFIGURATION.themeColor.2]">
-                                <Transform target="x" value="190 - 12 * textLength([STEP_COUNT] &gt;= [COMPLICATION.RANGED_VALUE_VALUE] ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT])" />
+                                <Transform target="x" value="190 - 12 * textLength([STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT])" />
                                 <Image resource="ic_shoe" />
                             </PartImage>
                             <PartText x="0" y="369" width="450" height="28">
@@ -179,13 +180,13 @@
                                 <Text align="CENTER">
                                     <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
                                         <Template><![CDATA[%s]]>
-                                            <Parameter expression="[STEP_COUNT] &gt;= [COMPLICATION.RANGED_VALUE_VALUE] ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]" />
+                                            <Parameter expression="[STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]" />
                                         </Template>
                                     </Font>
                                 </Text>
                             </PartText>
                             <PartImage x="148" y="268" width="28" height="28" alpha="168" tintColor="[CONFIGURATION.themeColor.0]">
-                                <Transform target="x" value="190 - 12 * textLength([STEP_COUNT] &gt;= [COMPLICATION.RANGED_VALUE_VALUE] ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT])" />
+                                <Transform target="x" value="190 - 12 * textLength([STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT])" />
                                 <Image resource="ic_shoe" />
                             </PartImage>
                         </Compare>
@@ -301,10 +302,9 @@
 
             <Complication type="RANGED_VALUE">
                 <!-- Steps the watch has counted since the app's last update, to add to the interval. Zero
-                     once a number is capped, as the true count can't be known from a capped value, and
                      above 300, which is more than a minute of running: the two counts don't match then. -->
                 <Group name="intervalDeltaSource" x="0" y="0" width="1" height="1">
-                    <Transform target="x" value="([COMPLICATION.RANGED_VALUE_VALUE] &lt; [COMPLICATION.RANGED_VALUE_MAX] &amp;&amp; [REFERENCE.todayApp] &lt; [REFERENCE.todayGoal] &amp;&amp; [STEP_COUNT] - [REFERENCE.todayApp] &gt;= 0 &amp;&amp; [STEP_COUNT] - [REFERENCE.todayApp] &lt;= 300) ? [STEP_COUNT] - [REFERENCE.todayApp] : 0" />
+                    <Transform target="x" value="([STEP_COUNT] - [REFERENCE.todayApp] &gt;= 0 &amp;&amp; [STEP_COUNT] - [REFERENCE.todayApp] &lt;= 300) ? [STEP_COUNT] - [REFERENCE.todayApp] : 0" />
                     <Reference name="intervalDelta" source="x" defaultValue="0" />
                 </Group>
 
@@ -340,7 +340,7 @@
                                 <Text align="CENTER">
                                     <Font family="SYNC_TO_DEVICE" size="22" color="[CONFIGURATION.themeColor.1]">
                                         <Template><![CDATA[%s of %s]]>
-                                            <Parameter expression="[REFERENCE.intervalDelta] &gt; 0 ? numberFormat(&quot;#,##0&quot;, [COMPLICATION.RANGED_VALUE_VALUE] + [REFERENCE.intervalDelta]) : [COMPLICATION.TEXT]" />
+                                            <Parameter expression="[REFERENCE.intervalDelta] &gt; 0 ? numberFormat(&quot;#,##0&quot;, ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) + [REFERENCE.intervalDelta]) : [COMPLICATION.TEXT]" />
                                             <Parameter expression="numberFormat(&quot;#,###&quot;, [COMPLICATION.RANGED_VALUE_MAX])" />
                                         </Template>
                                     </Font>

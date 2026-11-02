@@ -48,9 +48,10 @@ so the face uses it to keep up between the app's updates:
   where the count reads 0.
 - **Interval number and inner ring:** the app's value plus the steps the watch has counted since the
   app's last update.
-- **Above the interval target or the daily goal:** the interval number comes from the app alone, so it
-  moves once a minute. The app caps the values it sends at those limits, and the face can't do sums on
-  the text, so it can't tell how far past them you are.
+- **Past the interval target or the daily goal:** the same. The system rejects a value above the max,
+  so the app caps the value and takes the min below zero by the steps past it, and value - min is the
+  true count. This needs an app build from `feature_uncapped_complications` or later: with an older app
+  the number would read the target plus the new steps.
 - **The counts disagree by more than 300:** the interval number comes from the app alone.
 
 The two counts are kept separately, so they can differ by a few steps. Any difference shows in the total
@@ -224,10 +225,6 @@ Not needed for this face to work, but they would improve it:
    then, so reminder segments disappear after the last reminder of the day. With the real target as
    the max and `--` as the text, the face could keep them showing all day. The face would also need a
    small change: it treats a max above 1 as active, and would have to check for `--` as well.
-
-3. **Send the uncapped interval count.** The interval source caps its value at the target, so the face
-   can't keep the number live past it. The face's `intervalDelta` would also have to stop treating a
-   value at the max as capped.
 
 ## Demo
 
