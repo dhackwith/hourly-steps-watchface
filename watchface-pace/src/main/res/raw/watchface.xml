@@ -1130,6 +1130,39 @@
             </PartText>
         </Group>
 
+        <!-- Battery just above the hub, mirroring the interval text below it: an outline with a level
+             inside, in grey because the slot colour means steps here. The row stays centred as the number
+             changes length. Hidden always-on. -->
+        <Group name="battery" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <ScreenReader stringId="reader_battery">
+                <Parameter expression="[BATTERY_PERCENT]" />
+            </ScreenReader>
+            <PartDraw x="192" y="180" width="25" height="16">
+                <Transform target="x" value="203 - 5.25 * ([BATTERY_PERCENT] &gt;= 100 ? 3 : ([BATTERY_PERCENT] &gt;= 10 ? 2 : 1))" />
+                <RoundRectangle x="1" y="1" width="20" height="14" cornerRadiusX="3" cornerRadiusY="3">
+                    <Stroke thickness="2" color="#FFCAC4D0" />
+                </RoundRectangle>
+                <Rectangle x="22" y="5" width="3" height="6">
+                    <Fill color="#FFCAC4D0" />
+                </Rectangle>
+                <Rectangle x="4" y="4" width="14" height="8">
+                    <Fill color="#FFCAC4D0" />
+                    <Transform target="width" value="14 * clamp([BATTERY_PERCENT], 0, 100) / 100" />
+                </Rectangle>
+            </PartDraw>
+            <PartText x="222" y="174" width="60" height="28">
+                <Transform target="x" value="233 - 5.25 * ([BATTERY_PERCENT] &gt;= 100 ? 3 : ([BATTERY_PERCENT] &gt;= 10 ? 2 : 1))" />
+                <Text align="START">
+                    <Font family="SYNC_TO_DEVICE" size="18" color="#FFCAC4D0">
+                        <Template><![CDATA[%s%%]]>
+                            <Parameter expression="[BATTERY_PERCENT]" />
+                        </Template>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
         <!-- Hands and hub, over everything. The hands move once a minute and there is no seconds hand,
              for the battery. Thin hands always-on: Variant can't change a stroke, so the two groups swap alpha. -->
         <Group name="handsInteractive" x="0" y="0" width="450" height="450">

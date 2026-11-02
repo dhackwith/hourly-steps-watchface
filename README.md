@@ -251,8 +251,11 @@ or past the hand, you are on pace.
 - **Sub-dials:** the date at 12, heart rate at 3, today's total with the shoe at 6, and weather at 9. The
   weather dial is hidden with no weather data. "412 of 584" sits just below the hub. The states replace the
   numbers as on the main face: Paused, Off, `--` and Add Hourly Steps.
+- **Battery:** the charge level just above the hub, mirroring "412 of 584" below it, beside a small battery
+  that fills to match. It is grey because the `slot` colour means steps on this face.
 - **Always-on:** thin hands, the hub, the date and a thin bezel outline, with today's progress on the
-  outline so the goal colour still shows. The minute track and the sub-dials are hidden.
+  outline so the goal colour still shows. The minute track, the sub-dials and the battery
+  are hidden.
 
 ### The Interval setting
 
@@ -274,7 +277,7 @@ look behind. It relies on the app's half-hour slots starting on :00 and :30.
   reads the time in 12 or 24 hour form.
 - **The always-on interval ring:** the arc would light too many pixels and means little without the steps.
 
-A passing hand covers a readout for a few minutes each hour, most often "412 of 584".
+A passing hand covers a readout for a few minutes each hour, most often "412 of 584" or the battery.
 
 ### Build and test
 
@@ -289,6 +292,6 @@ Everything here was tested on the two emulators, not on a real watch. They repor
 the live `[STEP_COUNT]` blending, copied unchanged from the main face, hasn't been seen moving in this
 layout. The 30 minute, 1 hour and 2 hour options, Off, `--` and the no-app fallback were each checked there.
 
-Screenshots are in [demo/pace/](demo/pace/). Weather and heart rate are sample values in all of them. The
+Screenshots are in [demo/pace/](demo/pace/). Weather and heart rate are sample values in all of them, and the battery is set to 82 % with adb. The
 step numbers are samples in the active, behind, always-on, segments and theme shots. Goal met and paused are
-live app states. Goal met uses a low daily goal, which is why it reads "5,610 of 84".
+live app states. Goal met uses a low daily goal, which is why it reads "8,260 of 84".
