@@ -293,8 +293,8 @@ main face, so run the same two Google jars on this module's XML and APK by hand.
 
 Tested on the 384 and 454 emulators with Hourly Steps from `feature_uncapped_complications`, not yet on
 a Pixel Watch 4. So the weight and width of the watch's own system font are unchecked, along with the
-live count, which reads 0 on the emulators. Nothing lit comes closer than 23 units to the round edge in
-the screenshots, so the time has some room if the watch's digits come out wider.
+live count, which reads 0 on the emulators. On the emulators the time stays 23 units from the round edge
+and a five digit total 14, so there is some room if the watch's digits come out wider.
 
 Screenshots are in [demo/stack/](demo/stack/). `large-off`, `large-paused`, `small-paused`,
 `large-outside-window` and `small-fallback-no-app` are live app states, so they have no weather and show
