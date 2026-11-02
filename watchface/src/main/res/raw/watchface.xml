@@ -117,11 +117,12 @@
                     <Condition>
                         <Expressions>
                             <!-- The app sends 0 / 1 when there is nothing to show, so a real range has max above 1.
-                                 These two have to exclude each other: the renderer only redraws a Condition
+                                 These have to exclude each other: the renderer only redraws a Condition
                                  when the Compare it needs changes, so if active stayed true under goalMet the
                                  ring would go blank when the goal stops being met, as it does at midnight. -->
                             <Expression name="goalMet"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && [COMPLICATION.RANGED_VALUE_VALUE] >= [COMPLICATION.RANGED_VALUE_MAX]]]></Expression>
                             <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && [COMPLICATION.RANGED_VALUE_VALUE] < [COMPLICATION.RANGED_VALUE_MAX]]]></Expression>
+                            <Expression name="noGoal"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] <= 1]]></Expression>
                         </Expressions>
                         <Compare expression="goalMet">
                             <PartDraw x="0" y="0" width="450" height="450">
@@ -129,13 +130,22 @@
                                     <Stroke thickness="14" color="[CONFIGURATION.themeColor.2]" cap="ROUND" />
                                 </Arc>
                             </PartDraw>
-                            <PartText x="0" y="335" width="450" height="32">
+                            <PartText x="0" y="255" width="450" height="54">
                                 <Text align="CENTER">
-                                    <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.2]">
-                                        <Template><![CDATA[Goal met · %s]]>
+                                    <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="[CONFIGURATION.themeColor.2]">
+                                        <Template><![CDATA[%s]]>
                                             <Parameter expression="[COMPLICATION.TEXT]" />
                                         </Template>
                                     </Font>
+                                </Text>
+                            </PartText>
+                            <PartImage x="148" y="268" width="28" height="28" alpha="168" tintColor="[CONFIGURATION.themeColor.2]">
+                                <Transform target="x" value="190 - 12 * textLength([COMPLICATION.TEXT])" />
+                                <Image resource="ic_shoe" />
+                            </PartImage>
+                            <PartText x="0" y="369" width="450" height="28">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="18" color="[CONFIGURATION.themeColor.2]">Goal met</Font>
                                 </Text>
                             </PartText>
                         </Compare>
@@ -149,10 +159,25 @@
                                     <Transform target="endAngle" value="([REFERENCE.shownSegments] &gt; 1 &amp;&amp; 360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1) &lt; 2.41) ? 2.41 : 360 * clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
                                 </Arc>
                             </PartDraw>
-                            <PartText x="0" y="335" width="450" height="32">
+                            <PartText x="0" y="255" width="450" height="54">
                                 <Text align="CENTER">
-                                    <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.0]">
-                                        <Template><![CDATA[Today %s]]>
+                                    <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
+                                        <Template><![CDATA[%s]]>
+                                            <Parameter expression="[COMPLICATION.TEXT]" />
+                                        </Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartImage x="148" y="268" width="28" height="28" alpha="168" tintColor="[CONFIGURATION.themeColor.0]">
+                                <Transform target="x" value="190 - 12 * textLength([COMPLICATION.TEXT])" />
+                                <Image resource="ic_shoe" />
+                            </PartImage>
+                        </Compare>
+                        <Compare expression="noGoal">
+                            <PartText x="0" y="255" width="450" height="54">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
+                                        <Template><![CDATA[%s]]>
                                             <Parameter expression="[COMPLICATION.TEXT]" />
                                         </Template>
                                     </Font>
@@ -207,16 +232,19 @@
                             <Transform target="endAngle" value="3.6 * clamp([STEP_PERCENT], 0, 100)" />
                         </Arc>
                     </PartDraw>
-                    <PartText x="0" y="335" width="450" height="32">
+                    <PartText x="0" y="255" width="450" height="54">
                         <Text align="CENTER">
-                            <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.0]">
-                                <Template><![CDATA[%s %s]]>
+                            <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
+                                <Template><![CDATA[%s]]>
                                     <Parameter expression="[COMPLICATION.TEXT]" />
-                                    <Parameter expression="[COMPLICATION.TITLE]" />
                                 </Template>
                             </Font>
                         </Text>
                     </PartText>
+                    <PartImage x="148" y="268" width="28" height="28" alpha="168" tintColor="[CONFIGURATION.themeColor.0]">
+                        <Transform target="x" value="190 - 12 * textLength([COMPLICATION.TEXT])" />
+                        <Image resource="ic_shoe" />
+                    </PartImage>
                 </Group>
                 <Group name="todayTextAmbient" x="0" y="0" width="450" height="450" alpha="0">
                     <Variant mode="AMBIENT" target="alpha" value="140" />
@@ -268,18 +296,12 @@
                             <Stroke thickness="12" color="[CONFIGURATION.themeColor.3]" />
                         </Arc>
                     </PartDraw>
-                    <PartText x="0" y="235" width="410" height="50">
-                        <Text align="CENTER">
-                            <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
-                                <Template><![CDATA[%s]]>
-                                    <Parameter expression="[COMPLICATION.TEXT]" />
-                                </Template>
-                            </Font>
-                        </Text>
-                    </PartText>
                     <Condition>
                         <Expressions>
                             <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1]]></Expression>
+                            <!-- Outside the reminder window the app sends these two dashes. Paused and Off
+                                 already show as the big word, from the today ring. -->
+                            <Expression name="outsideWindow"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] <= 1 && textLength([COMPLICATION.TEXT]) == 2]]></Expression>
                         </Expressions>
                         <Compare expression="active">
                             <PartDraw x="0" y="0" width="410" height="410">
@@ -292,9 +314,21 @@
                             <!-- The app sends no title with RANGED_VALUE, so the target comes from the max. -->
                             <PartText x="0" y="284" width="410" height="30">
                                 <Text align="CENTER">
-                                    <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.1]">
-                                        <Template><![CDATA[of %s]]>
+                                    <Font family="SYNC_TO_DEVICE" size="22" color="[CONFIGURATION.themeColor.1]">
+                                        <Template><![CDATA[%s of %s]]>
+                                            <Parameter expression="[COMPLICATION.TEXT]" />
                                             <Parameter expression="numberFormat(&quot;#,###&quot;, [COMPLICATION.RANGED_VALUE_MAX])" />
+                                        </Template>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Compare>
+                        <Compare expression="outsideWindow">
+                            <PartText x="0" y="284" width="410" height="30">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="22" color="#FFCAC4D0">
+                                        <Template><![CDATA[%s]]>
+                                            <Parameter expression="[COMPLICATION.TEXT]" />
                                         </Template>
                                     </Font>
                                 </Text>
@@ -329,19 +363,11 @@
                             <Stroke thickness="12" color="[CONFIGURATION.themeColor.3]" />
                         </Arc>
                     </PartDraw>
-                    <PartText x="0" y="235" width="410" height="50">
-                        <Text align="CENTER">
-                            <Font family="SYNC_TO_DEVICE" size="44" weight="BOLD" color="#FFFFFFFF">
-                                <Template><![CDATA[%s]]>
-                                    <Parameter expression="[COMPLICATION.TEXT]" />
-                                </Template>
-                            </Font>
-                        </Text>
-                    </PartText>
                     <PartText x="0" y="284" width="410" height="30">
                         <Text align="CENTER">
-                            <Font family="SYNC_TO_DEVICE" size="20" color="[CONFIGURATION.themeColor.1]">
-                                <Template><![CDATA[%s]]>
+                            <Font family="SYNC_TO_DEVICE" size="22" color="[CONFIGURATION.themeColor.1]">
+                                <Template><![CDATA[%s %s]]>
+                                    <Parameter expression="[COMPLICATION.TEXT]" />
                                     <Parameter expression="[COMPLICATION.TITLE]" />
                                 </Template>
                             </Font>
@@ -354,7 +380,7 @@
             <Complication type="EMPTY">
                 <Group name="intervalEmptyInteractive" x="0" y="0" width="410" height="410">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
-                    <PartText x="0" y="235" width="410" height="50">
+                    <PartText x="0" y="284" width="410" height="30">
                         <Text align="CENTER">
                             <Font family="SYNC_TO_DEVICE" size="18" color="#FFCAC4D0">Add Hourly Steps</Font>
                         </Text>
@@ -807,10 +833,10 @@
             <ScreenReader stringId="reader_heart">
                 <Parameter expression="[HEART_RATE_Z]" />
             </ScreenReader>
-            <PartImage x="192" y="372" width="22" height="22" alpha="168" tintColor="[CONFIGURATION.themeColor.1]">
+            <PartImage x="192" y="345" width="22" height="22" alpha="168" tintColor="[CONFIGURATION.themeColor.1]">
                 <Image resource="ic_heart" />
             </PartImage>
-            <PartText x="219" y="368" width="70" height="30">
+            <PartText x="219" y="341" width="70" height="30">
                 <Text align="START">
                     <Font family="SYNC_TO_DEVICE" size="22" weight="BOLD" color="#FFFFFFFF">
                         <Template><![CDATA[%s]]>

@@ -5,7 +5,8 @@ time, in the app's seven colour themes.
 
 - **Outer ring:** today's steps against the daily goal. It turns the theme's goal colour once met.
 - **Inner ring:** this interval's steps against its target.
-- **Numbers:** the interval's steps, "of 584", and "Today 3,100" or "Goal met · 7,040".
+- **Numbers:** today's total as the big number beside a stepping shoe, with "412 of 584" for this
+  interval under it.
 - **Reminder segments (optional):** the outer ring cut into one segment per reminder.
 - **Weather:** an icon for the condition, the current temperature, and today's low / high.
 - **Heart rate:** the watch's latest reading.
@@ -27,12 +28,12 @@ app, it keeps the fallback below until you remove and re-add it, or pick the sou
 
 | App state | Rings | Text |
 |---|---|---|
-| Active | both fill | number, "of 584", "Today 3,100" |
-| Daily goal met | outer ring full, in the goal colour | "Goal met · 7,040" |
+| Active | both fill | "3,100", "412 of 584" |
+| Daily goal met | outer ring full, in the goal colour | the total in the goal colour, "412 of 584", "Goal met" |
 | Paused | empty tracks | "Paused" |
 | Day off | empty tracks | "Off" |
-| Outside the reminder window | inner ring empty | "--", and today's line stays |
-| App not installed | outer track from the watch's own step goal, inner ring hidden | "3,050 Steps", "Add Hourly Steps" |
+| Outside the reminder window | inner ring empty | the total, and "--" under it |
+| App not installed | outer track from the watch's own step goal, inner ring hidden | "3050", "Add Hourly Steps" |
 
 The numbers update when the app sends them: at most once a minute while you walk and every 5 minutes
 otherwise, the same as the app's tile.
@@ -186,8 +187,8 @@ read its output as well as its exit code.
 - The face can't tell how long an interval is, so it says "of 584", not "of 584 this hour".
 - The system step counter is text only, so without the app the ring comes from `[STEP_PERCENT]`.
   That reads 0 on the emulators, so this ring still needs checking on a real watch with the app removed.
-- Rings and text are vector. The only bitmaps are the preview, the flavor icons and the weather and
-  heart icons.
+- Rings and text are vector. The only bitmaps are the preview, the flavor icons and the weather,
+  heart and shoe icons.
 
 ## Credits
 
@@ -208,6 +209,6 @@ Not needed for this face to work, but they would improve it:
 
 ## Demo
 
-Screenshots in [demo/](demo/) are from the two emulators. The theme, preview and `large-active` /
-`small-active` shots use sample weather and step numbers. The `large-goal-met`, `-paused`, `-off` and
-`-outside-window-24h` shots are live app states from before the weather row was added.
+Screenshots in [demo/](demo/) are from the two emulators. The theme and `large-active` shots use
+sample weather, heart rate and step numbers. The others are live app states, so they have no weather
+and show `--` for heart rate.
