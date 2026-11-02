@@ -4,6 +4,7 @@
 
     <string name="slot_today">Today ring</string>
     <string name="slot_interval">Interval ring</string>
+    <string name="slot_reminders">Reminder count</string>
 
     <string name="reader_today">Today\'s steps: %1$s</string>
     <string name="reader_interval">Steps this interval: %1$s</string>

@@ -73,13 +73,13 @@ An optional setting cuts the outer ring into one segment per reminder, so 12 rem
 segments. Turn it on in the watch face editor: long-press the face, tap the edit button, swipe to
 **Other options** and switch on **Reminder segments**. It is off by default.
 
-The face works the count out from the app's numbers: the daily goal over the interval target, rounded
-up, so it follows your interval and plan without any setting of its own. It has room for 48 segments,
-a whole day of half-hour reminders. 6, 12 and 24 have been tested on the emulators.
+The count comes from the app's reminder count source, in a hidden slot that isn't offered in the editor,
+so it follows your interval and plan without any setting of its own. It needs an app build from
+`feature_remaining_steps` or later. The face has room for 48 segments, a whole day of half-hour reminders.
+12 has been tested on a Pixel Watch 4 with live data, and 6, 24 and 48 with fixed values.
 
-The ring is plain when there is no count to work out: outside the reminder window, while paused or on
-a day off, or without the app. It is also plain once the daily goal is met, a solid ring in the goal
-colour, because the app may then send a different target.
+The ring is plain while paused, on a day off, or without the app. It is also plain once the daily goal is
+met, a solid ring in the goal colour.
 
 ![12 segments](demo/large-segments-12.png) ![24 segments](demo/large-segments-24.png)
 
@@ -221,10 +221,6 @@ Not needed for this face to work, but they would improve it:
 1. **Put the interval's wording in the title.** `RangedValueComplicationData` is built without a
    title, so the face builds "of 584" from the max. With `setTitle("of 584 this hour")` on the
    interval source the face could use the real wording for 30 min and 2 h intervals.
-2. **Keep sending the interval target outside the reminder window.** The interval source sends 0 / 1
-   then, so reminder segments disappear after the last reminder of the day. With the real target as
-   the max and `--` as the text, the face could keep them showing all day. The face would also need a
-   small change: it treats a max above 1 as active, and would have to check for `--` as well.
 
 ## Demo
 

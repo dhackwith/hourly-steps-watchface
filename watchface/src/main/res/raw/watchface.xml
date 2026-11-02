@@ -117,11 +117,10 @@
                     <Reference name="todayGoal" source="x" defaultValue="0" />
                 </Group>
 
-                <!-- Publishes the number of segments: the goal over the interval target, rounded up
-                     because the app rounds each target up. None once the goal is met, when the app
-                     may send a different target, or while there is no target. Draws nothing. -->
+                <!-- Publishes the number of segments: today's reminders, from the hidden slot below. None
+                     once the goal is met, or while there is no goal. Draws nothing. -->
                 <Group name="segmentCountSource" x="0" y="0" width="1" height="1">
-                    <Transform target="x" value="([REFERENCE.intervalTarget] &gt; 1 &amp;&amp; [COMPLICATION.RANGED_VALUE_MAX] &gt; 1 &amp;&amp; [REFERENCE.todayLive] &lt; [COMPLICATION.RANGED_VALUE_MAX]) ? ceil([COMPLICATION.RANGED_VALUE_MAX] / [REFERENCE.intervalTarget]) : 0" />
+                    <Transform target="x" value="([REFERENCE.reminderCount] &gt; 1 &amp;&amp; [COMPLICATION.RANGED_VALUE_MAX] &gt; 1 &amp;&amp; [REFERENCE.todayLive] &lt; [COMPLICATION.RANGED_VALUE_MAX]) ? [REFERENCE.reminderCount] : 0" />
                     <Reference name="segments" source="x" defaultValue="0" />
                 </Group>
                 <Group name="todayInteractive" x="0" y="0" width="450" height="450">
@@ -308,11 +307,6 @@
                     <Reference name="intervalDelta" source="x" defaultValue="0" />
                 </Group>
 
-                <!-- Publishes the interval target for the today ring's segments. Draws nothing. -->
-                <Group name="intervalTargetSource" x="0" y="0" width="1" height="1">
-                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_MAX]" />
-                    <Reference name="intervalTarget" source="x" defaultValue="0" />
-                </Group>
                 <Group name="intervalInteractive" x="0" y="0" width="410" height="410">
                     <Variant mode="AMBIENT" target="alpha" value="0" />
                     <PartDraw x="0" y="0" width="410" height="410">
@@ -409,6 +403,24 @@
                             <Font family="SYNC_TO_DEVICE" size="18" color="#FFCAC4D0">Add Hourly Steps</Font>
                         </Text>
                     </PartText>
+                </Group>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Today's reminder count, for the segments: the target changes every hour, so it can't be
+             worked out from the rings. Off screen in a corner, and not offered in the editor. -->
+        <ComplicationSlot x="0" y="0" width="1" height="1" slotId="3" displayName="slot_reminders"
+            supportedTypes="RANGED_VALUE EMPTY" isCustomizable="FALSE">
+            <DefaultProviderPolicy
+                primaryProvider="com.hourlysteps/com.hourlysteps.surfaces.ReminderCountComplicationService"
+                primaryProviderType="RANGED_VALUE"
+                defaultSystemProvider="EMPTY"
+                defaultSystemProviderType="EMPTY" />
+            <BoundingBox x="0" y="0" width="1" height="1" />
+            <Complication type="RANGED_VALUE">
+                <Group name="reminderCountSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_VALUE]" />
+                    <Reference name="reminderCount" source="x" defaultValue="0" />
                 </Group>
             </Complication>
         </ComplicationSlot>
