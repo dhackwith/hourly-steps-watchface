@@ -5,6 +5,10 @@
     <string name="slot_today">Today ring</string>
     <string name="slot_interval">Interval ring</string>
 
+    <string name="reader_today">Today\'s steps: %1$s</string>
+    <string name="reader_interval">Steps this interval: %1$s</string>
+    <string name="reader_time">%1$s:%2$s</string>
+
     <string name="theme_label">Theme</string>
     <string name="theme_violet">Violet</string>
     <string name="theme_classic">Classic</string>
