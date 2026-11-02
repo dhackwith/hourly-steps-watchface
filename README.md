@@ -10,8 +10,9 @@ time, in the app's seven colour themes.
 - **Reminder segments (optional):** the outer ring cut into one segment per reminder.
 - **Weather:** an icon for the condition, the current temperature, and today's low / high.
 - **Heart rate:** the watch's latest reading.
-- **Always-on:** thin dim rings, the date, and the time in regular weight at 70 %. Weather, heart rate
-  and the step numbers are hidden.
+- **Battery:** the charge level as a percentage, beside a small battery that fills to match.
+- **Always-on:** thin dim rings, the date, and the time in regular weight at 70 %. Weather, heart rate,
+  battery and the step numbers are hidden.
 - **Tap a ring** to open Hourly Steps.
 
 ![The seven themes](demo/themes.png)

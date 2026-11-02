@@ -869,14 +869,44 @@
             <ScreenReader stringId="reader_heart">
                 <Parameter expression="[HEART_RATE_Z]" />
             </ScreenReader>
-            <PartImage x="192" y="345" width="22" height="22" alpha="168" tintColor="[CONFIGURATION.themeColor.1]">
+            <PartImage x="146" y="345" width="22" height="22" alpha="168" tintColor="[CONFIGURATION.themeColor.1]">
                 <Image resource="ic_heart" />
             </PartImage>
-            <PartText x="219" y="341" width="70" height="30">
+            <PartText x="173" y="341" width="60" height="30">
                 <Text align="START">
                     <Font family="SYNC_TO_DEVICE" size="22" weight="BOLD" color="#FFFFFFFF">
                         <Template><![CDATA[%s]]>
                             <Parameter expression="round([HEART_RATE]) &gt; 0 ? numberFormat(&quot;#&quot;, round([HEART_RATE])) : &quot;--&quot;" />
+                        </Template>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
+        <!-- Battery: an outline with a level inside, so the number can't be read as step progress.
+             Hidden always-on. -->
+        <Group name="battery" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <ScreenReader stringId="reader_battery">
+                <Parameter expression="[BATTERY_PERCENT]" />
+            </ScreenReader>
+            <PartDraw x="238" y="348" width="25" height="16" alpha="168">
+                <RoundRectangle x="1" y="1" width="20" height="14" cornerRadiusX="3" cornerRadiusY="3">
+                    <Stroke thickness="2" color="[CONFIGURATION.themeColor.1]" />
+                </RoundRectangle>
+                <Rectangle x="22" y="5" width="3" height="6">
+                    <Fill color="[CONFIGURATION.themeColor.1]" />
+                </Rectangle>
+                <Rectangle x="4" y="4" width="14" height="8">
+                    <Fill color="[CONFIGURATION.themeColor.1]" />
+                    <Transform target="width" value="14 * clamp([BATTERY_PERCENT], 0, 100) / 100" />
+                </Rectangle>
+            </PartDraw>
+            <PartText x="268" y="341" width="70" height="30">
+                <Text align="START">
+                    <Font family="SYNC_TO_DEVICE" size="22" weight="BOLD" color="#FFFFFFFF">
+                        <Template><![CDATA[%s%%]]>
+                            <Parameter expression="[BATTERY_PERCENT]" />
                         </Template>
                     </Font>
                 </Text>
