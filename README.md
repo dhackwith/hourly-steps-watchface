@@ -231,3 +231,64 @@ Not needed for this face to work, but they would improve it:
 Screenshots in [demo/](demo/) are from the two emulators. The theme and `large-active` shots use
 sample weather, heart rate and step numbers. The others are live app states, so they have no weather
 and show `--` for heart rate.
+
+## Variant: Pace
+
+An analog version of the face, in its own module, [watchface-pace/](watchface-pace/), with the package
+`com.hourlysteps.watchface.pace` and the name **Hourly Steps Pace**. The interval's steps are drawn along
+the minute track from 12 o'clock, so they read directly against the minute hand: if the arc's tip is at
+or past the hand, you are on pace.
+
+![Active, behind, goal met, paused, always-on, segments and two other themes](demo/pace/overview.png)
+
+- **Minute track:** a band with 60 black notches, wider every five minutes, and a bolder index inside it
+  for each hour. The arc fills the band in the theme's `slot` colour and stops at its target, while the
+  number keeps counting.
+- **Bezel:** today's steps against the daily goal, in the goal colour once met. **Reminder segments**
+  works as on the main face.
+- **Hands:** hour and minute in the theme's `today` colour with a white hub. They move once a minute and
+  there is no seconds hand, for the battery.
+- **Sub-dials:** the date at 12, heart rate at 3, today's total with the shoe at 6, and weather at 9. The
+  weather dial is hidden with no weather data. "412 of 584" sits just below the hub. The states replace the
+  numbers as on the main face: Paused, Off, `--` and Add Hourly Steps.
+- **Always-on:** thin hands, the hub, the date and a thin bezel outline, with today's progress on the
+  outline so the goal colour still shows. The minute track and the sub-dials are hidden.
+
+### The Interval setting
+
+The face can't read the interval from the app, so set it to match, in the watch face editor under
+**Interval**. It defaults to 1 hour.
+
+| Interval | Target sits at | Reading it |
+|---|---|---|
+| 30 minutes | 6 o'clock | The arc starts at 12 for the first half hour and at 6 for the second, so its tip still reads against the hand. |
+| 1 hour | a full circle | The arc's tip against the hand. |
+| 2 hours | a full circle | Plain progress only: the hand goes round twice, so the arc can't be read against it. The face also can't tell which of the two hours it is in. |
+
+The half-hour start is an addition to "always from 12 o'clock". Without it, every second half hour would
+look behind. It relies on the app's half-hour slots starting on :00 and :30.
+
+### What it drops
+
+- **Digital time, AM/PM and the 12/24 hour setting:** the hands are the time. The screen reader still
+  reads the time in 12 or 24 hour form.
+- **The always-on interval ring:** the arc would light too many pixels and means little without the steps.
+
+A passing hand covers a readout for a few minutes each hour, most often "412 of 584".
+
+### Build and test
+
+```bash
+./gradlew :watchface-pace:check assembleDebug
+```
+
+`tools/validate.*` only look at `watchface/`. Running the same two Google tools on this module by hand
+passes both the v4 schema and the memory limits.
+
+Everything here was tested on the two emulators, not on a real watch. They report a step count of 0, so
+the live `[STEP_COUNT]` blending, copied unchanged from the main face, hasn't been seen moving in this
+layout. The 30 minute, 1 hour and 2 hour options, Off, `--` and the no-app fallback were each checked there.
+
+Screenshots are in [demo/pace/](demo/pace/). Weather and heart rate are sample values in all of them. The
+step numbers are samples in the active, behind, always-on, segments and theme shots. Goal met and paused are
+live app states. Goal met uses a low daily goal, which is why it reads "5,610 of 84".
