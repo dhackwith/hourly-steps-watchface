@@ -246,8 +246,11 @@ time is the picture, and the numbers read like a table beside it.
 - **AM/PM:** turned on its side in a narrow strip beside the hours, because there is no room beside them
   otherwise. 24 hour mode leaves the strip empty, so the column doesn't move.
 - **Column,** left-aligned, top to bottom: date, today's steps with a thin bar, "412 of 584" with a thin
-  bar in the `slot` colour, weather, heart rate. Numbers are bold and white, labels are smaller in
-  `#CAC4D0`, and the only colour is in the bars and icons.
+  bar in the `slot` colour, weather, heart rate and battery. Numbers are bold and white, labels are smaller
+  in `#CAC4D0`, and the only colour is in the bars and icons.
+- **Battery:** `[BATTERY_PERCENT]` on the heart rate row, in line with the weather's low / high. It is
+  small and dim because it is secondary, with a little battery that fills to match, so the number can't
+  be taken for step progress. Hidden always-on.
 - **Goal met:** the total and its bar turn the goal colour, and "Goal met" appears as a last line.
 - **Reminder segments:** the same option and count as the main face, but it cuts the today bar instead
   of a ring. A bar has two ends, so 12 reminders make 11 gaps. The gaps get thinner above 24 so the pieces
@@ -294,7 +297,8 @@ main face, so run the same two Google jars on this module's XML and APK by hand.
 Tested on the 384 and 454 emulators with Hourly Steps from `feature_uncapped_complications`, not yet on
 a Pixel Watch 4. So the weight and width of the watch's own system font are unchecked, along with the
 live count, which reads 0 on the emulators. On the emulators the time stays 23 units from the round edge
-and a five digit total 14, so there is some room if the watch's digits come out wider.
+and a five digit total 14, so there is some room if the watch's digits come out wider. "100%" on the
+battery row beside weather should be about 12, which is worked out, not measured.
 
 Screenshots are in [demo/stack/](demo/stack/). `large-off`, `large-paused`, `small-paused`,
 `large-outside-window` and `small-fallback-no-app` are live app states, so they have no weather and show

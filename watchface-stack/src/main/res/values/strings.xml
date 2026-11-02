@@ -9,6 +9,7 @@
     <string name="reader_interval">Steps this interval: %1$s</string>
     <string name="reader_weather">%1$s, %2$s degrees</string>
     <string name="reader_heart">Heart rate: %1$s</string>
+    <string name="reader_battery">Battery: %1$s percent</string>
     <string name="reader_time">%1$s:%2$s</string>
 
     <string name="segments_label">Reminder segments</string>

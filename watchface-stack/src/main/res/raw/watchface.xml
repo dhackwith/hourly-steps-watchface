@@ -865,6 +865,37 @@
             </PartText>
         </Group>
 
+        <!-- Battery: an outline with a level inside, so the number can't be read as step progress.
+             On the heart rate row, in line with the weather's low / high. Hidden always-on. -->
+        <Group name="battery" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Transform target="y" value="[WEATHER.IS_AVAILABLE] ? 0 : -38" />
+            <ScreenReader stringId="reader_battery">
+                <Parameter expression="[BATTERY_PERCENT]" />
+            </ScreenReader>
+            <PartDraw x="350" y="304" width="25" height="16" alpha="168">
+                <RoundRectangle x="1" y="1" width="20" height="14" cornerRadiusX="3" cornerRadiusY="3">
+                    <Stroke thickness="2" color="[CONFIGURATION.themeColor.1]" />
+                </RoundRectangle>
+                <Rectangle x="22" y="5" width="3" height="6">
+                    <Fill color="[CONFIGURATION.themeColor.1]" />
+                </Rectangle>
+                <Rectangle x="4" y="4" width="14" height="8">
+                    <Fill color="[CONFIGURATION.themeColor.1]" />
+                    <Transform target="width" value="14 * clamp([BATTERY_PERCENT], 0, 100) / 100" />
+                </Rectangle>
+            </PartDraw>
+            <PartText x="379" y="296" width="52" height="32">
+                <Text align="START">
+                    <Font family="SYNC_TO_DEVICE" size="16" color="#FFCAC4D0">
+                        <Template><![CDATA[%s%%]]>
+                            <Parameter expression="[BATTERY_PERCENT]" />
+                        </Template>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
         <!-- Goal met, the last line of the column. -->
         <Group name="goalLine" x="0" y="0" width="450" height="450">
             <Variant mode="AMBIENT" target="alpha" value="0" />
