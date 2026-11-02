@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WatchFace width="450" height="450" clipShape="CIRCLE">
+    <Metadata key="CLOCK_TYPE" value="DIGITAL" />
+    <Metadata key="PREVIEW_TIME" value="10:08:00" />
+    <Scene backgroundColor="#FF000000">
+        <PartText x="0" y="130" width="450" height="130">
+            <Text align="CENTER">
+                <Font family="SYNC_TO_DEVICE" size="120" weight="BOLD" color="#FFFFFFFF">
+                    <Template><![CDATA[%s:%s]]>
+                        <Parameter expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12]" />
+                        <Parameter expression="[MINUTE_Z]" />
+                    </Template>
+                </Font>
+            </Text>
+        </PartText>
+    </Scene>
+</WatchFace>
