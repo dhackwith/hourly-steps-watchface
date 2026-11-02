@@ -231,3 +231,78 @@ Not needed for this face to work, but they would improve it:
 Screenshots in [demo/](demo/) are from the two emulators. The theme and `large-active` shots use
 sample weather, heart rate and step numbers. The others are live app states, so they have no weather
 and show `--` for heart rate.
+
+## Variant: Tide
+
+[watchface-tide](watchface-tide) is a second face with the same data and no rings. Today's steps are
+water rising up the round face, and the day's goal is the brim. It installs beside the main face as
+**Hourly Steps Tide** (`com.hourlysteps.watchface.tide`).
+
+![Tide at mid level](demo/tide/large-active-mid.png) ![The surface behind the time](demo/tide/large-active-crossing.png) ![Goal met](demo/tide/large-goal-met.png)
+
+- **Water:** the surface's height is today's steps over the daily goal. It's the theme's `today` colour
+  at about half strength under a brighter 3-unit surface line, and it darkens with depth. Once the goal
+  is met it's the `goalMet` colour, full, with the surface at the top of the face. A small dash marks the
+  brim until then.
+- **Surface:** one still wave, made of two shallow arcs of a large circle that meet at the middle of the
+  face. Nothing animates. It moves when the step count does.
+- **Time:** bold white with a 3-unit black outline, so it reads above the water, behind it and across
+  the surface line. The total, the interval text and AM/PM have thinner outlines for the same reason.
+- **Interval:** a slim gauge under the time, the `track` colour filled with the `slot` colour, with
+  "412 of 584" under it. Paused, Off and `--` replace that text. Without the app the gauge goes and it
+  says "Add Hourly Steps".
+- **Today's total and heart rate:** share a row above the bottom of the water. Weather and the date are
+  at the top. With no total to show, the heart rate moves to the middle of the row.
+- **Reminder guides (optional):** tick marks up both walls at each reminder's share of the goal, like a
+  measuring jug. They follow the same rules as the main face's segments: on in **Other options** in the
+  editor, and gone when there is no count to work out or once the goal is met.
+- **Always-on:** the time, the date and the surface as a thin dim line, with no water. The time is drawn
+  opaque, so the line stops at the digits.
+- **Tap** anywhere to open Hourly Steps. The today source fills the face, and the interval source is
+  the gauge and its text.
+
+The themes, flavors, complication slots, app states, weather, heart rate, 12/24 hour time and the live
+step blending are the main face's, and the notes on them above apply here too. Without the app the water
+comes from `[STEP_PERCENT]`, which reads 0 on the emulators, so that level still needs checking on a real
+watch. The face hasn't been on a real watch yet.
+
+**Dropped or changed from the main face:**
+
+- The interval has no always-on form, where the main face keeps a dim inner ring.
+- The total is size 38, down from 44, to fit beside the heart rate.
+- Paused and Off show under the gauge instead of as a big word in place of the total.
+- The surface stops 14 units below the top of the face, so the line is still visible at the goal.
+
+The level follows height, not area: on a round face the first and last tenth of the goal cover far less
+area than the middle ones.
+
+More on the renderer, from building this face:
+
+- `LinearGradient` `colors` doesn't resolve `[CONFIGURATION.*]`: the fill comes out flat. The depth
+  here is a black gradient from transparent, drawn over a flat theme colour.
+- A `Shadow` with no offset had no visible effect on the time. `Outline` works.
+- A `PartDraw` doesn't clip to its bounds. The wave is cut from the top of the water by painting black
+  over it, with a circle far larger than its part, so everything else has to be drawn after that and
+  the scene's background has to stay black.
+- Always-on, the water's edge leaves a faint trace on the outermost pixel of the circle, at most 17 of
+  255 on the emulator. Covering it with a black rectangle is worse: the time then shows as a checkerboard
+  of dots.
+
+`tools/validate.*` only checks `watchface/`. To build and install this face:
+
+```bash
+./gradlew :watchface-tide:check assembleDebug
+```
+
+```bash
+adb install -r watchface-tide/build/outputs/apk/debug/watchface-tide-debug.apk
+```
+
+```bash
+adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SURFACE --es operation set-watchface --es watchFaceId com.hourlysteps.watchface.tide
+```
+
+Screenshots are in [demo/tide/](demo/tide/). They use sample weather, heart rate and step numbers set
+in the XML for the shot, except `small-fallback-no-app`, which is the real no-app state.
+
+![Themes](demo/tide/themes.png)

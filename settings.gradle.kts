@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "HourlyStepsWatchFace"
 include(":watchface")
+include(":watchface-tide")

@@ -1,0 +1,1343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WatchFace width="450" height="450" clipShape="CIRCLE">
+    <Metadata key="CLOCK_TYPE" value="DIGITAL" />
+    <Metadata key="PREVIEW_TIME" value="10:08:00" />
+
+    <!-- Weather icons, indexed by [WEATHER.CONDITION] so every condition is covered. -->
+    <BitmapFonts>
+        <BitmapFont name="weather_day">
+            <Character name="0" resource="ic_unknown" width="96" height="96" />
+            <Character name="1" resource="ic_sunny" width="96" height="96" />
+            <Character name="2" resource="ic_cloudy" width="96" height="96" />
+            <Character name="3" resource="ic_fog" width="96" height="96" />
+            <Character name="4" resource="ic_heavy_rain" width="96" height="96" />
+            <Character name="5" resource="ic_heavy_snow" width="96" height="96" />
+            <Character name="6" resource="ic_rain" width="96" height="96" />
+            <Character name="7" resource="ic_snow" width="96" height="96" />
+            <Character name="8" resource="ic_sunny" width="96" height="96" />
+            <Character name="9" resource="ic_thunderstorm" width="96" height="96" />
+            <Word name="10" resource="ic_sleet" width="96" height="96" />
+            <Word name="11" resource="ic_snow" width="96" height="96" />
+            <Word name="12" resource="ic_rain" width="96" height="96" />
+            <Word name="13" resource="ic_fog" width="96" height="96" />
+            <Word name="14" resource="ic_partly_cloudy_day" width="96" height="96" />
+            <Word name="15" resource="ic_windy" width="96" height="96" />
+        </BitmapFont>
+        <BitmapFont name="weather_night">
+            <Character name="0" resource="ic_unknown" width="96" height="96" />
+            <Character name="1" resource="ic_clear" width="96" height="96" />
+            <Character name="2" resource="ic_cloudy" width="96" height="96" />
+            <Character name="3" resource="ic_fog" width="96" height="96" />
+            <Character name="4" resource="ic_heavy_rain" width="96" height="96" />
+            <Character name="5" resource="ic_heavy_snow" width="96" height="96" />
+            <Character name="6" resource="ic_rain" width="96" height="96" />
+            <Character name="7" resource="ic_snow" width="96" height="96" />
+            <Character name="8" resource="ic_clear" width="96" height="96" />
+            <Character name="9" resource="ic_thunderstorm" width="96" height="96" />
+            <Word name="10" resource="ic_sleet" width="96" height="96" />
+            <Word name="11" resource="ic_snow" width="96" height="96" />
+            <Word name="12" resource="ic_rain" width="96" height="96" />
+            <Word name="13" resource="ic_fog" width="96" height="96" />
+            <Word name="14" resource="ic_partly_cloudy_night" width="96" height="96" />
+            <Word name="15" resource="ic_windy" width="96" height="96" />
+        </BitmapFont>
+    </BitmapFonts>
+
+    <UserConfigurations>
+        <!-- Colours in the fixed order today, slot, goalMet, track. Keep every option equal to
+             AppTheme.kt in the Hourly Steps app; the README has the parity table.
+             The renderer can't parse a colour list with a single option, and only takes numeric ids. -->
+        <ColorConfiguration id="themeColor" displayName="theme_label" screenReaderText="theme_label" defaultValue="0">
+            <ColorOption id="0" displayName="theme_violet" colors="#E3D2FF #A98BFF #FFCC80 #2D2640" />
+            <ColorOption id="1" displayName="theme_classic" colors="#D0BCFF #4DD0E1 #FFCC80 #2E2A36" />
+            <ColorOption id="2" displayName="theme_ocean" colors="#90CAF9 #2DD4BF #FFE082 #1C2C36" />
+            <ColorOption id="3" displayName="theme_forest" colors="#9CD6A0 #D4E157 #FFD54F #22302A" />
+            <ColorOption id="4" displayName="theme_sunset" colors="#FF9E80 #FFC44D #FFF176 #36281F" />
+            <ColorOption id="5" displayName="theme_rose" colors="#FFC2DC #FF6FA8 #FFE082 #36252E" />
+            <ColorOption id="6" displayName="theme_graphite" colors="#EEEEEE #90A4AE #FFD54F #2A2C2E" />
+        </ColorConfiguration>
+        <BooleanConfiguration id="levelGuides" displayName="segments_label" screenReaderText="segments_label" defaultValue="FALSE" />
+        <Flavors defaultValue="violet">
+            <Flavor id="violet" displayName="theme_violet" icon="flavor_violet">
+                <Configuration id="themeColor" optionId="0" />
+            </Flavor>
+            <Flavor id="classic" displayName="theme_classic" icon="flavor_classic">
+                <Configuration id="themeColor" optionId="1" />
+            </Flavor>
+            <Flavor id="ocean" displayName="theme_ocean" icon="flavor_ocean">
+                <Configuration id="themeColor" optionId="2" />
+            </Flavor>
+            <Flavor id="forest" displayName="theme_forest" icon="flavor_forest">
+                <Configuration id="themeColor" optionId="3" />
+            </Flavor>
+            <Flavor id="sunset" displayName="theme_sunset" icon="flavor_sunset">
+                <Configuration id="themeColor" optionId="4" />
+            </Flavor>
+            <Flavor id="rose" displayName="theme_rose" icon="flavor_rose">
+                <Configuration id="themeColor" optionId="5" />
+            </Flavor>
+            <Flavor id="graphite" displayName="theme_graphite" icon="flavor_graphite">
+                <Configuration id="themeColor" optionId="6" />
+            </Flavor>
+        </Flavors>
+    </UserConfigurations>
+
+    <Scene backgroundColor="#FF000000">
+
+        <!-- Today: the water level. Its height is today's steps over the daily goal, and the goal is the
+             brim near the top of the face. Fill area and text sit in the interactive group; always-on keeps
+             only the surface as a thin dim line. -->
+        <ComplicationSlot x="0" y="0" width="450" height="450" slotId="1" displayName="slot_today"
+            supportedTypes="RANGED_VALUE SHORT_TEXT EMPTY" isCustomizable="TRUE">
+            <DefaultProviderPolicy
+                primaryProvider="com.hourlysteps/com.hourlysteps.surfaces.TodayComplicationService"
+                primaryProviderType="RANGED_VALUE"
+                defaultSystemProvider="STEP_COUNT"
+                defaultSystemProviderType="SHORT_TEXT" />
+            <BoundingOval x="0" y="0" width="450" height="450" />
+            <ScreenReader stringId="reader_today">
+                <Parameter expression="[COMPLICATION.TEXT]" />
+            </ScreenReader>
+
+            <Complication type="RANGED_VALUE">
+                <!-- The app sends its numbers at most once a minute, but the watch's own count moves every
+                     second or two while walking, so the total and the level follow whichever is ahead.
+                     The system rejects a value above the max, so past it the app caps the value and takes
+                     the min below zero: value - min is always the true count. Draws nothing. -->
+                <Group name="todayLiveSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="[STEP_COUNT] &gt; ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? [STEP_COUNT] : ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN])" />
+                    <Reference name="todayLive" source="x" defaultValue="0" />
+                </Group>
+                <Group name="todayAppSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN])" />
+                    <Reference name="todayApp" source="x" defaultValue="0" />
+                </Group>
+                <Group name="todayGoalSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_MAX]" />
+                    <Reference name="todayGoal" source="x" defaultValue="0" />
+                </Group>
+
+                <!-- Publishes the number of segments: the goal over the interval target, rounded up
+                     because the app rounds each target up. None once the goal is met, when the app
+                     may send a different target, or while there is no target. Draws nothing. -->
+                <Group name="segmentCountSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="([REFERENCE.intervalTarget] &gt; 1 &amp;&amp; [COMPLICATION.RANGED_VALUE_MAX] &gt; 1 &amp;&amp; [REFERENCE.todayLive] &lt; [COMPLICATION.RANGED_VALUE_MAX]) ? ceil([COMPLICATION.RANGED_VALUE_MAX] / [REFERENCE.intervalTarget]) : 0" />
+                    <Reference name="segments" source="x" defaultValue="0" />
+                </Group>
+
+                <!-- Publishes the height of the surface: 450 is empty, 14 is the brim. Draws nothing. -->
+                <Group name="waterLevelSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="450 - 436 * clamp(([REFERENCE.todayLive] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
+                    <Reference name="waterLevel" source="x" defaultValue="450" />
+                </Group>
+
+                <!-- With no total to show (Paused, Off) the heart rate moves to the middle. Draws nothing. -->
+                <Group name="noTotalSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_MAX] &lt;= 1 ? 1 : 0" />
+                    <Reference name="noTotal" source="x" defaultValue="0" />
+                </Group>
+
+                <Group name="todayInteractive" x="0" y="0" width="450" height="450">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <Condition>
+                        <Expressions>
+                            <!-- The app sends 0 / 1 when there is nothing to show, so a real range has max above 1.
+                                 These have to exclude each other: the renderer only redraws a Condition
+                                 when the Compare it needs changes, so if active stayed true under goalMet the
+                                 water would go blank when the goal stops being met, as it does at midnight. -->
+                            <Expression name="goalMet"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && ([COMPLICATION.RANGED_VALUE_VALUE] >= [COMPLICATION.RANGED_VALUE_MAX] || [STEP_COUNT] >= [COMPLICATION.RANGED_VALUE_MAX])]]></Expression>
+                            <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && [COMPLICATION.RANGED_VALUE_VALUE] < [COMPLICATION.RANGED_VALUE_MAX] && [STEP_COUNT] < [COMPLICATION.RANGED_VALUE_MAX]]]></Expression>
+                        </Expressions>
+                        <Compare expression="goalMet">
+                            <PartDraw x="0" y="6" width="450" height="458" alpha="124">
+                                <Rectangle x="0" y="0" width="450" height="458">
+                                    <Fill color="[CONFIGURATION.themeColor.2]" />
+                                </Rectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="6" width="450" height="458">
+                                <Rectangle x="0" y="0" width="450" height="458">
+                                    <Fill color="#FFFFFFFF">
+                                        <LinearGradient startX="0" startY="0" endX="0" endY="520" colors="#00000000 #FF000000" positions="0 1" />
+                                    </Fill>
+                                </Rectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="-26" width="450" height="80">
+                                <Arc centerX="105" centerY="936" width="1832" height="1832" startAngle="-12" endAngle="7.63">
+                                    <Stroke thickness="24" color="#FF000000" />
+                                </Arc>
+                                <Ellipse x="-559" y="-1760" width="1808" height="1808">
+                                    <Fill color="#FF000000" />
+                                </Ellipse>
+                            </PartDraw>
+                            <PartDraw x="0" y="-26" width="450" height="80">
+                                <Arc centerX="105" centerY="936" width="1808" height="1808" startAngle="-12" endAngle="7.63">
+                                    <Stroke thickness="3" color="[CONFIGURATION.themeColor.2]" />
+                                </Arc>
+                                <Arc centerX="345" centerY="-856" width="1808" height="1808" startAngle="168" endAngle="187.63">
+                                    <Stroke thickness="3" color="[CONFIGURATION.themeColor.2]" />
+                                </Arc>
+                            </PartDraw>
+                        </Compare>
+                        <Compare expression="active">
+                            <PartDraw x="0" y="0" width="450" height="458" alpha="124">
+                                <Transform target="y" value="[REFERENCE.waterLevel] - 8" />
+                                <Transform target="alpha" value="[REFERENCE.todayLive] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 124 : 0" />
+                                <Rectangle x="0" y="0" width="450" height="458">
+                                    <Fill color="[CONFIGURATION.themeColor.0]" />
+                                </Rectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="0" width="450" height="458">
+                                <Transform target="y" value="[REFERENCE.waterLevel] - 8" />
+                                <Rectangle x="0" y="0" width="450" height="458">
+                                    <Fill color="#FFFFFFFF">
+                                        <LinearGradient startX="0" startY="0" endX="0" endY="520" colors="#00000000 #FF000000" positions="0 1" />
+                                    </Fill>
+                                </Rectangle>
+                            </PartDraw>
+                            <PartDraw x="0" y="0" width="450" height="80">
+                                <Transform target="y" value="[REFERENCE.waterLevel] - 40" />
+                                <Arc centerX="105" centerY="936" width="1832" height="1832" startAngle="-12" endAngle="7.63">
+                                    <Stroke thickness="24" color="#FF000000" />
+                                </Arc>
+                                <Ellipse x="-559" y="-1760" width="1808" height="1808">
+                                    <Fill color="#FF000000" />
+                                </Ellipse>
+                            </PartDraw>
+                            <PartDraw x="0" y="0" width="450" height="80">
+                                <Transform target="y" value="[REFERENCE.waterLevel] - 40" />
+                                <Transform target="alpha" value="[REFERENCE.todayLive] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
+                                <Arc centerX="105" centerY="936" width="1808" height="1808" startAngle="-12" endAngle="7.63">
+                                    <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" />
+                                </Arc>
+                                <Arc centerX="345" centerY="-856" width="1808" height="1808" startAngle="168" endAngle="187.63">
+                                    <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" />
+                                </Arc>
+                            </PartDraw>
+                        </Compare>
+                    </Condition>
+                    <PartDraw x="0" y="0" width="450" height="30" alpha="120">
+                        <Transform target="alpha" value="[REFERENCE.waterLevel] &lt;= 14 ? 0 : 120" />
+                        <Line startX="195" startY="14" endX="255" endY="14">
+                            <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
+                        </Line>
+                    </PartDraw>
+                    <!-- Optional reminder guides: tick marks up both walls, like a measuring jug, at each reminder's share of the goal. -->
+                    <BooleanConfiguration id="levelGuides">
+                        <BooleanOption id="TRUE">
+                            <Group name="levelGuideLines" x="0" y="0" width="450" height="450">
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 1 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 1 ? 450 - 2 - 436 * 1 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 1 ? 225 - sqrt(50625 - pow(225 - 436 * 1 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 1 ? 253 - sqrt(50625 - pow(225 - 436 * 1 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 1 ? 225 + sqrt(50625 - pow(225 - 436 * 1 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 1 ? 197 + sqrt(50625 - pow(225 - 436 * 1 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 2 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 2 ? 450 - 2 - 436 * 2 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 2 ? 225 - sqrt(50625 - pow(225 - 436 * 2 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 2 ? 253 - sqrt(50625 - pow(225 - 436 * 2 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 2 ? 225 + sqrt(50625 - pow(225 - 436 * 2 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 2 ? 197 + sqrt(50625 - pow(225 - 436 * 2 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 3 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 3 ? 450 - 2 - 436 * 3 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 3 ? 225 - sqrt(50625 - pow(225 - 436 * 3 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 3 ? 253 - sqrt(50625 - pow(225 - 436 * 3 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 3 ? 225 + sqrt(50625 - pow(225 - 436 * 3 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 3 ? 197 + sqrt(50625 - pow(225 - 436 * 3 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 4 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 4 ? 450 - 2 - 436 * 4 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 4 ? 225 - sqrt(50625 - pow(225 - 436 * 4 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 4 ? 253 - sqrt(50625 - pow(225 - 436 * 4 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 4 ? 225 + sqrt(50625 - pow(225 - 436 * 4 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 4 ? 197 + sqrt(50625 - pow(225 - 436 * 4 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 5 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 5 ? 450 - 2 - 436 * 5 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 5 ? 225 - sqrt(50625 - pow(225 - 436 * 5 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 5 ? 253 - sqrt(50625 - pow(225 - 436 * 5 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 5 ? 225 + sqrt(50625 - pow(225 - 436 * 5 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 5 ? 197 + sqrt(50625 - pow(225 - 436 * 5 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 6 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 6 ? 450 - 2 - 436 * 6 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 6 ? 225 - sqrt(50625 - pow(225 - 436 * 6 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 6 ? 253 - sqrt(50625 - pow(225 - 436 * 6 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 6 ? 225 + sqrt(50625 - pow(225 - 436 * 6 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 6 ? 197 + sqrt(50625 - pow(225 - 436 * 6 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 7 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 7 ? 450 - 2 - 436 * 7 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 7 ? 225 - sqrt(50625 - pow(225 - 436 * 7 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 7 ? 253 - sqrt(50625 - pow(225 - 436 * 7 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 7 ? 225 + sqrt(50625 - pow(225 - 436 * 7 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 7 ? 197 + sqrt(50625 - pow(225 - 436 * 7 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 8 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 8 ? 450 - 2 - 436 * 8 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 8 ? 225 - sqrt(50625 - pow(225 - 436 * 8 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 8 ? 253 - sqrt(50625 - pow(225 - 436 * 8 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 8 ? 225 + sqrt(50625 - pow(225 - 436 * 8 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 8 ? 197 + sqrt(50625 - pow(225 - 436 * 8 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 9 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 9 ? 450 - 2 - 436 * 9 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 9 ? 225 - sqrt(50625 - pow(225 - 436 * 9 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 9 ? 253 - sqrt(50625 - pow(225 - 436 * 9 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 9 ? 225 + sqrt(50625 - pow(225 - 436 * 9 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 9 ? 197 + sqrt(50625 - pow(225 - 436 * 9 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 10 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 10 ? 450 - 2 - 436 * 10 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 10 ? 225 - sqrt(50625 - pow(225 - 436 * 10 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 10 ? 253 - sqrt(50625 - pow(225 - 436 * 10 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 10 ? 225 + sqrt(50625 - pow(225 - 436 * 10 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 10 ? 197 + sqrt(50625 - pow(225 - 436 * 10 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 11 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 11 ? 450 - 2 - 436 * 11 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 11 ? 225 - sqrt(50625 - pow(225 - 436 * 11 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 11 ? 253 - sqrt(50625 - pow(225 - 436 * 11 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 11 ? 225 + sqrt(50625 - pow(225 - 436 * 11 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 11 ? 197 + sqrt(50625 - pow(225 - 436 * 11 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 12 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 12 ? 450 - 2 - 436 * 12 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 12 ? 225 - sqrt(50625 - pow(225 - 436 * 12 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 12 ? 253 - sqrt(50625 - pow(225 - 436 * 12 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 12 ? 225 + sqrt(50625 - pow(225 - 436 * 12 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 12 ? 197 + sqrt(50625 - pow(225 - 436 * 12 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 13 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 13 ? 450 - 2 - 436 * 13 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 13 ? 225 - sqrt(50625 - pow(225 - 436 * 13 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 13 ? 253 - sqrt(50625 - pow(225 - 436 * 13 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 13 ? 225 + sqrt(50625 - pow(225 - 436 * 13 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 13 ? 197 + sqrt(50625 - pow(225 - 436 * 13 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 14 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 14 ? 450 - 2 - 436 * 14 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 14 ? 225 - sqrt(50625 - pow(225 - 436 * 14 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 14 ? 253 - sqrt(50625 - pow(225 - 436 * 14 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 14 ? 225 + sqrt(50625 - pow(225 - 436 * 14 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 14 ? 197 + sqrt(50625 - pow(225 - 436 * 14 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 15 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 15 ? 450 - 2 - 436 * 15 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 15 ? 225 - sqrt(50625 - pow(225 - 436 * 15 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 15 ? 253 - sqrt(50625 - pow(225 - 436 * 15 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 15 ? 225 + sqrt(50625 - pow(225 - 436 * 15 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 15 ? 197 + sqrt(50625 - pow(225 - 436 * 15 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 16 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 16 ? 450 - 2 - 436 * 16 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 16 ? 225 - sqrt(50625 - pow(225 - 436 * 16 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 16 ? 253 - sqrt(50625 - pow(225 - 436 * 16 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 16 ? 225 + sqrt(50625 - pow(225 - 436 * 16 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 16 ? 197 + sqrt(50625 - pow(225 - 436 * 16 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 17 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 17 ? 450 - 2 - 436 * 17 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 17 ? 225 - sqrt(50625 - pow(225 - 436 * 17 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 17 ? 253 - sqrt(50625 - pow(225 - 436 * 17 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 17 ? 225 + sqrt(50625 - pow(225 - 436 * 17 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 17 ? 197 + sqrt(50625 - pow(225 - 436 * 17 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 18 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 18 ? 450 - 2 - 436 * 18 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 18 ? 225 - sqrt(50625 - pow(225 - 436 * 18 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 18 ? 253 - sqrt(50625 - pow(225 - 436 * 18 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 18 ? 225 + sqrt(50625 - pow(225 - 436 * 18 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 18 ? 197 + sqrt(50625 - pow(225 - 436 * 18 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 19 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 19 ? 450 - 2 - 436 * 19 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 19 ? 225 - sqrt(50625 - pow(225 - 436 * 19 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 19 ? 253 - sqrt(50625 - pow(225 - 436 * 19 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 19 ? 225 + sqrt(50625 - pow(225 - 436 * 19 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 19 ? 197 + sqrt(50625 - pow(225 - 436 * 19 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 20 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 20 ? 450 - 2 - 436 * 20 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 20 ? 225 - sqrt(50625 - pow(225 - 436 * 20 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 20 ? 253 - sqrt(50625 - pow(225 - 436 * 20 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 20 ? 225 + sqrt(50625 - pow(225 - 436 * 20 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 20 ? 197 + sqrt(50625 - pow(225 - 436 * 20 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 21 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 21 ? 450 - 2 - 436 * 21 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 21 ? 225 - sqrt(50625 - pow(225 - 436 * 21 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 21 ? 253 - sqrt(50625 - pow(225 - 436 * 21 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 21 ? 225 + sqrt(50625 - pow(225 - 436 * 21 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 21 ? 197 + sqrt(50625 - pow(225 - 436 * 21 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 22 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 22 ? 450 - 2 - 436 * 22 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 22 ? 225 - sqrt(50625 - pow(225 - 436 * 22 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 22 ? 253 - sqrt(50625 - pow(225 - 436 * 22 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 22 ? 225 + sqrt(50625 - pow(225 - 436 * 22 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 22 ? 197 + sqrt(50625 - pow(225 - 436 * 22 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 23 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 23 ? 450 - 2 - 436 * 23 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 23 ? 225 - sqrt(50625 - pow(225 - 436 * 23 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 23 ? 253 - sqrt(50625 - pow(225 - 436 * 23 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 23 ? 225 + sqrt(50625 - pow(225 - 436 * 23 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 23 ? 197 + sqrt(50625 - pow(225 - 436 * 23 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 24 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 24 ? 450 - 2 - 436 * 24 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 24 ? 225 - sqrt(50625 - pow(225 - 436 * 24 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 24 ? 253 - sqrt(50625 - pow(225 - 436 * 24 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 24 ? 225 + sqrt(50625 - pow(225 - 436 * 24 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 24 ? 197 + sqrt(50625 - pow(225 - 436 * 24 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 25 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 25 ? 450 - 2 - 436 * 25 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 25 ? 225 - sqrt(50625 - pow(225 - 436 * 25 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 25 ? 253 - sqrt(50625 - pow(225 - 436 * 25 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 25 ? 225 + sqrt(50625 - pow(225 - 436 * 25 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 25 ? 197 + sqrt(50625 - pow(225 - 436 * 25 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 26 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 26 ? 450 - 2 - 436 * 26 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 26 ? 225 - sqrt(50625 - pow(225 - 436 * 26 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 26 ? 253 - sqrt(50625 - pow(225 - 436 * 26 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 26 ? 225 + sqrt(50625 - pow(225 - 436 * 26 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 26 ? 197 + sqrt(50625 - pow(225 - 436 * 26 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 27 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 27 ? 450 - 2 - 436 * 27 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 27 ? 225 - sqrt(50625 - pow(225 - 436 * 27 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 27 ? 253 - sqrt(50625 - pow(225 - 436 * 27 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 27 ? 225 + sqrt(50625 - pow(225 - 436 * 27 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 27 ? 197 + sqrt(50625 - pow(225 - 436 * 27 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 28 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 28 ? 450 - 2 - 436 * 28 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 28 ? 225 - sqrt(50625 - pow(225 - 436 * 28 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 28 ? 253 - sqrt(50625 - pow(225 - 436 * 28 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 28 ? 225 + sqrt(50625 - pow(225 - 436 * 28 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 28 ? 197 + sqrt(50625 - pow(225 - 436 * 28 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 29 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 29 ? 450 - 2 - 436 * 29 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 29 ? 225 - sqrt(50625 - pow(225 - 436 * 29 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 29 ? 253 - sqrt(50625 - pow(225 - 436 * 29 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 29 ? 225 + sqrt(50625 - pow(225 - 436 * 29 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 29 ? 197 + sqrt(50625 - pow(225 - 436 * 29 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 30 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 30 ? 450 - 2 - 436 * 30 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 30 ? 225 - sqrt(50625 - pow(225 - 436 * 30 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 30 ? 253 - sqrt(50625 - pow(225 - 436 * 30 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 30 ? 225 + sqrt(50625 - pow(225 - 436 * 30 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 30 ? 197 + sqrt(50625 - pow(225 - 436 * 30 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 31 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 31 ? 450 - 2 - 436 * 31 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 31 ? 225 - sqrt(50625 - pow(225 - 436 * 31 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 31 ? 253 - sqrt(50625 - pow(225 - 436 * 31 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 31 ? 225 + sqrt(50625 - pow(225 - 436 * 31 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 31 ? 197 + sqrt(50625 - pow(225 - 436 * 31 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 32 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 32 ? 450 - 2 - 436 * 32 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 32 ? 225 - sqrt(50625 - pow(225 - 436 * 32 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 32 ? 253 - sqrt(50625 - pow(225 - 436 * 32 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 32 ? 225 + sqrt(50625 - pow(225 - 436 * 32 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 32 ? 197 + sqrt(50625 - pow(225 - 436 * 32 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 33 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 33 ? 450 - 2 - 436 * 33 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 33 ? 225 - sqrt(50625 - pow(225 - 436 * 33 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 33 ? 253 - sqrt(50625 - pow(225 - 436 * 33 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 33 ? 225 + sqrt(50625 - pow(225 - 436 * 33 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 33 ? 197 + sqrt(50625 - pow(225 - 436 * 33 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 34 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 34 ? 450 - 2 - 436 * 34 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 34 ? 225 - sqrt(50625 - pow(225 - 436 * 34 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 34 ? 253 - sqrt(50625 - pow(225 - 436 * 34 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 34 ? 225 + sqrt(50625 - pow(225 - 436 * 34 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 34 ? 197 + sqrt(50625 - pow(225 - 436 * 34 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 35 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 35 ? 450 - 2 - 436 * 35 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 35 ? 225 - sqrt(50625 - pow(225 - 436 * 35 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 35 ? 253 - sqrt(50625 - pow(225 - 436 * 35 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 35 ? 225 + sqrt(50625 - pow(225 - 436 * 35 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 35 ? 197 + sqrt(50625 - pow(225 - 436 * 35 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 36 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 36 ? 450 - 2 - 436 * 36 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 36 ? 225 - sqrt(50625 - pow(225 - 436 * 36 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 36 ? 253 - sqrt(50625 - pow(225 - 436 * 36 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 36 ? 225 + sqrt(50625 - pow(225 - 436 * 36 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 36 ? 197 + sqrt(50625 - pow(225 - 436 * 36 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 37 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 37 ? 450 - 2 - 436 * 37 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 37 ? 225 - sqrt(50625 - pow(225 - 436 * 37 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 37 ? 253 - sqrt(50625 - pow(225 - 436 * 37 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 37 ? 225 + sqrt(50625 - pow(225 - 436 * 37 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 37 ? 197 + sqrt(50625 - pow(225 - 436 * 37 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 38 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 38 ? 450 - 2 - 436 * 38 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 38 ? 225 - sqrt(50625 - pow(225 - 436 * 38 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 38 ? 253 - sqrt(50625 - pow(225 - 436 * 38 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 38 ? 225 + sqrt(50625 - pow(225 - 436 * 38 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 38 ? 197 + sqrt(50625 - pow(225 - 436 * 38 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 39 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 39 ? 450 - 2 - 436 * 39 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 39 ? 225 - sqrt(50625 - pow(225 - 436 * 39 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 39 ? 253 - sqrt(50625 - pow(225 - 436 * 39 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 39 ? 225 + sqrt(50625 - pow(225 - 436 * 39 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 39 ? 197 + sqrt(50625 - pow(225 - 436 * 39 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 40 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 40 ? 450 - 2 - 436 * 40 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 40 ? 225 - sqrt(50625 - pow(225 - 436 * 40 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 40 ? 253 - sqrt(50625 - pow(225 - 436 * 40 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 40 ? 225 + sqrt(50625 - pow(225 - 436 * 40 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 40 ? 197 + sqrt(50625 - pow(225 - 436 * 40 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 41 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 41 ? 450 - 2 - 436 * 41 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 41 ? 225 - sqrt(50625 - pow(225 - 436 * 41 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 41 ? 253 - sqrt(50625 - pow(225 - 436 * 41 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 41 ? 225 + sqrt(50625 - pow(225 - 436 * 41 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 41 ? 197 + sqrt(50625 - pow(225 - 436 * 41 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 42 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 42 ? 450 - 2 - 436 * 42 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 42 ? 225 - sqrt(50625 - pow(225 - 436 * 42 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 42 ? 253 - sqrt(50625 - pow(225 - 436 * 42 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 42 ? 225 + sqrt(50625 - pow(225 - 436 * 42 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 42 ? 197 + sqrt(50625 - pow(225 - 436 * 42 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 43 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 43 ? 450 - 2 - 436 * 43 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 43 ? 225 - sqrt(50625 - pow(225 - 436 * 43 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 43 ? 253 - sqrt(50625 - pow(225 - 436 * 43 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 43 ? 225 + sqrt(50625 - pow(225 - 436 * 43 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 43 ? 197 + sqrt(50625 - pow(225 - 436 * 43 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 44 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 44 ? 450 - 2 - 436 * 44 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 44 ? 225 - sqrt(50625 - pow(225 - 436 * 44 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 44 ? 253 - sqrt(50625 - pow(225 - 436 * 44 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 44 ? 225 + sqrt(50625 - pow(225 - 436 * 44 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 44 ? 197 + sqrt(50625 - pow(225 - 436 * 44 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 45 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 45 ? 450 - 2 - 436 * 45 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 45 ? 225 - sqrt(50625 - pow(225 - 436 * 45 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 45 ? 253 - sqrt(50625 - pow(225 - 436 * 45 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 45 ? 225 + sqrt(50625 - pow(225 - 436 * 45 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 45 ? 197 + sqrt(50625 - pow(225 - 436 * 45 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 46 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 46 ? 450 - 2 - 436 * 46 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 46 ? 225 - sqrt(50625 - pow(225 - 436 * 46 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 46 ? 253 - sqrt(50625 - pow(225 - 436 * 46 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 46 ? 225 + sqrt(50625 - pow(225 - 436 * 46 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 46 ? 197 + sqrt(50625 - pow(225 - 436 * 46 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                                <PartDraw x="0" y="0" width="450" height="4">
+                                    <Transform target="alpha" value="[REFERENCE.segments] &gt; 47 ? 110 : 0" />
+                                    <Transform target="y" value="[REFERENCE.segments] &gt; 47 ? 450 - 2 - 436 * 47 / [REFERENCE.segments] : 0" />
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 47 ? 225 - sqrt(50625 - pow(225 - 436 * 47 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 47 ? 253 - sqrt(50625 - pow(225 - 436 * 47 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                    <Line startX="0" startY="2" endX="0" endY="2">
+                                        <Stroke thickness="2" color="#FFFFFFFF" />
+                                        <Transform target="startX" value="[REFERENCE.segments] &gt; 47 ? 225 + sqrt(50625 - pow(225 - 436 * 47 / [REFERENCE.segments], 2)) : 0" />
+                                        <Transform target="endX" value="[REFERENCE.segments] &gt; 47 ? 197 + sqrt(50625 - pow(225 - 436 * 47 / [REFERENCE.segments], 2)) : 0" />
+                                    </Line>
+                                </PartDraw>
+                            </Group>
+                        </BooleanOption>
+                    </BooleanConfiguration>
+
+                    <Condition>
+                        <Expressions>
+                            <Expression name="goalMet"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && ([COMPLICATION.RANGED_VALUE_VALUE] >= [COMPLICATION.RANGED_VALUE_MAX] || [STEP_COUNT] >= [COMPLICATION.RANGED_VALUE_MAX])]]></Expression>
+                            <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && [COMPLICATION.RANGED_VALUE_VALUE] < [COMPLICATION.RANGED_VALUE_MAX] && [STEP_COUNT] < [COMPLICATION.RANGED_VALUE_MAX]]]></Expression>
+                        </Expressions>
+                        <Compare expression="goalMet">
+                            <PartText x="0" y="318" width="254" height="48">
+                                <Text align="END">
+                                    <Font family="SYNC_TO_DEVICE" size="38" weight="BOLD" color="[CONFIGURATION.themeColor.2]">
+                                        <Outline color="#FF000000" width="2">
+                                            <Template><![CDATA[%s]]>
+                                                <Parameter expression="[STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]" />
+                                            </Template>
+                                        </Outline>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartImage x="120" y="329" width="26" height="26" alpha="200" tintColor="[CONFIGURATION.themeColor.2]">
+                                <Transform target="x" value="216 - 21 * textLength([STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]) + (textLength([STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]) &gt; 3 ? 11 : 0)" />
+                                <Image resource="ic_shoe" />
+                            </PartImage>
+                            <PartText x="0" y="402" width="450" height="26">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="18" color="[CONFIGURATION.themeColor.2]">Goal met</Font>
+                                </Text>
+                            </PartText>
+                        </Compare>
+                        <Compare expression="active">
+                            <PartText x="0" y="318" width="254" height="48">
+                                <Text align="END">
+                                    <Font family="SYNC_TO_DEVICE" size="38" weight="BOLD" color="#FFFFFFFF">
+                                        <Outline color="#FF000000" width="2">
+                                            <Template><![CDATA[%s]]>
+                                                <Parameter expression="[STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]" />
+                                            </Template>
+                                        </Outline>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                            <PartImage x="120" y="329" width="26" height="26" alpha="200" tintColor="#FFFFFFFF">
+                                <Transform target="x" value="216 - 21 * textLength([STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]) + (textLength([STEP_COUNT] &gt;= ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) ? numberFormat(&quot;#,##0&quot;, [STEP_COUNT]) : [COMPLICATION.TEXT]) &gt; 3 ? 11 : 0)" />
+                                <Image resource="ic_shoe" />
+                            </PartImage>
+                        </Compare>
+                    </Condition>
+                </Group>
+                <Group name="todayAmbient" x="0" y="0" width="450" height="450" alpha="0">
+                    <Variant mode="AMBIENT" target="alpha" value="140" />
+                    <Condition>
+                        <Expressions>
+                            <Expression name="goalMet"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && ([COMPLICATION.RANGED_VALUE_VALUE] >= [COMPLICATION.RANGED_VALUE_MAX] || [STEP_COUNT] >= [COMPLICATION.RANGED_VALUE_MAX])]]></Expression>
+                            <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1 && [COMPLICATION.RANGED_VALUE_VALUE] < [COMPLICATION.RANGED_VALUE_MAX] && [STEP_COUNT] < [COMPLICATION.RANGED_VALUE_MAX]]]></Expression>
+                        </Expressions>
+                        <Compare expression="goalMet">
+                            <PartDraw x="0" y="-26" width="450" height="80">
+                                <Arc centerX="105" centerY="936" width="1808" height="1808" startAngle="-12" endAngle="7.63">
+                                    <Stroke thickness="2" color="[CONFIGURATION.themeColor.2]" />
+                                </Arc>
+                                <Arc centerX="345" centerY="-856" width="1808" height="1808" startAngle="168" endAngle="187.63">
+                                    <Stroke thickness="2" color="[CONFIGURATION.themeColor.2]" />
+                                </Arc>
+                            </PartDraw>
+                        </Compare>
+                        <Compare expression="active">
+                            <PartDraw x="0" y="0" width="450" height="80">
+                                <Transform target="y" value="[REFERENCE.waterLevel] - 40" />
+                                <Transform target="alpha" value="[REFERENCE.todayLive] &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
+                                <Arc centerX="105" centerY="936" width="1808" height="1808" startAngle="-12" endAngle="7.63">
+                                    <Stroke thickness="2" color="[CONFIGURATION.themeColor.0]" />
+                                </Arc>
+                                <Arc centerX="345" centerY="-856" width="1808" height="1808" startAngle="168" endAngle="187.63">
+                                    <Stroke thickness="2" color="[CONFIGURATION.themeColor.0]" />
+                                </Arc>
+                            </PartDraw>
+                        </Compare>
+                    </Condition>
+                </Group>
+            </Complication>
+
+            <!-- A text-only source, which is also all the system step counter offers (it rejects
+                 RANGED_VALUE): the text comes from the source and the level from the watch's own step
+                 goal. STEP_PERCENT reads 0 on the emulator, so the water stays empty there. -->
+            <Complication type="SHORT_TEXT">
+                <Group name="stepLevelSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="450 - 436 * clamp([STEP_PERCENT], 0, 100) / 100" />
+                    <Reference name="stepLevel" source="x" defaultValue="450" />
+                </Group>
+                <Group name="todayTextInteractive" x="0" y="0" width="450" height="450">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <PartDraw x="0" y="0" width="450" height="458" alpha="124">
+                        <Transform target="y" value="[REFERENCE.stepLevel] - 8" />
+                        <Transform target="alpha" value="[STEP_PERCENT] &gt; 0 ? 124 : 0" />
+                        <Rectangle x="0" y="0" width="450" height="458">
+                            <Fill color="[CONFIGURATION.themeColor.0]" />
+                        </Rectangle>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="458">
+                        <Transform target="y" value="[REFERENCE.stepLevel] - 8" />
+                        <Rectangle x="0" y="0" width="450" height="458">
+                            <Fill color="#FFFFFFFF">
+                                <LinearGradient startX="0" startY="0" endX="0" endY="520" colors="#00000000 #FF000000" positions="0 1" />
+                            </Fill>
+                        </Rectangle>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="80">
+                        <Transform target="y" value="[REFERENCE.stepLevel] - 40" />
+                        <Arc centerX="105" centerY="936" width="1832" height="1832" startAngle="-12" endAngle="7.63">
+                            <Stroke thickness="24" color="#FF000000" />
+                        </Arc>
+                        <Ellipse x="-559" y="-1760" width="1808" height="1808">
+                            <Fill color="#FF000000" />
+                        </Ellipse>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="80">
+                        <Transform target="y" value="[REFERENCE.stepLevel] - 40" />
+                        <Transform target="alpha" value="[STEP_PERCENT] &gt; 0 ? 255 : 0" />
+                        <Arc centerX="105" centerY="936" width="1808" height="1808" startAngle="-12" endAngle="7.63">
+                            <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" />
+                        </Arc>
+                        <Arc centerX="345" centerY="-856" width="1808" height="1808" startAngle="168" endAngle="187.63">
+                            <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" />
+                        </Arc>
+                    </PartDraw>
+                    <PartDraw x="0" y="0" width="450" height="30" alpha="120">
+                        <Line startX="195" startY="14" endX="255" endY="14">
+                            <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
+                        </Line>
+                    </PartDraw>
+                    <PartText x="0" y="318" width="254" height="48">
+                        <Text align="END">
+                            <Font family="SYNC_TO_DEVICE" size="38" weight="BOLD" color="#FFFFFFFF">
+                                <Outline color="#FF000000" width="2">
+                                    <Template><![CDATA[%s]]>
+                                        <Parameter expression="[COMPLICATION.TEXT]" />
+                                    </Template>
+                                </Outline>
+                            </Font>
+                        </Text>
+                    </PartText>
+                    <PartImage x="120" y="329" width="26" height="26" alpha="200" tintColor="#FFFFFFFF">
+                        <Transform target="x" value="216 - 21 * textLength([COMPLICATION.TEXT])" />
+                        <Image resource="ic_shoe" />
+                    </PartImage>
+                </Group>
+                <Group name="todayTextAmbient" x="0" y="0" width="450" height="450" alpha="0">
+                    <Variant mode="AMBIENT" target="alpha" value="140" />
+                    <PartDraw x="0" y="0" width="450" height="80">
+                        <Transform target="y" value="[REFERENCE.stepLevel] - 40" />
+                        <Transform target="alpha" value="[STEP_PERCENT] &gt; 0 ? 255 : 0" />
+                        <Arc centerX="105" centerY="936" width="1808" height="1808" startAngle="-12" endAngle="7.63">
+                            <Stroke thickness="2" color="[CONFIGURATION.themeColor.0]" />
+                        </Arc>
+                        <Arc centerX="345" centerY="-856" width="1808" height="1808" startAngle="168" endAngle="187.63">
+                            <Stroke thickness="2" color="[CONFIGURATION.themeColor.0]" />
+                        </Arc>
+                    </PartDraw>
+                </Group>
+            </Complication>
+
+            <Complication type="EMPTY">
+                <Group name="todayEmptyInteractive" x="0" y="0" width="450" height="450">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <PartDraw x="0" y="0" width="450" height="30" alpha="120">
+                        <Line startX="195" startY="14" endX="255" endY="14">
+                            <Stroke thickness="3" color="[CONFIGURATION.themeColor.0]" cap="ROUND" />
+                        </Line>
+                    </PartDraw>
+                </Group>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Interval: a slim gauge under the time, this interval's steps against its target. -->
+        <ComplicationSlot x="75" y="266" width="300" height="52" slotId="2" displayName="slot_interval"
+            supportedTypes="RANGED_VALUE SHORT_TEXT EMPTY" isCustomizable="TRUE">
+            <DefaultProviderPolicy
+                primaryProvider="com.hourlysteps/com.hourlysteps.surfaces.SlotComplicationService"
+                primaryProviderType="RANGED_VALUE"
+                defaultSystemProvider="EMPTY"
+                defaultSystemProviderType="EMPTY" />
+            <BoundingBox x="0" y="0" width="300" height="52" />
+            <ScreenReader stringId="reader_interval">
+                <Parameter expression="[COMPLICATION.TEXT]" />
+            </ScreenReader>
+
+            <Complication type="RANGED_VALUE">
+                <!-- Steps the watch has counted since the app's last update, to add to the interval. Zero
+                     above 300, which is more than a minute of running: the two counts don't match then. -->
+                <Group name="intervalDeltaSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="([STEP_COUNT] - [REFERENCE.todayApp] &gt;= 0 &amp;&amp; [STEP_COUNT] - [REFERENCE.todayApp] &lt;= 300) ? [STEP_COUNT] - [REFERENCE.todayApp] : 0" />
+                    <Reference name="intervalDelta" source="x" defaultValue="0" />
+                </Group>
+
+                <!-- Publishes the interval target for the level guides. Draws nothing. -->
+                <Group name="intervalTargetSource" x="0" y="0" width="1" height="1">
+                    <Transform target="x" value="[COMPLICATION.RANGED_VALUE_MAX]" />
+                    <Reference name="intervalTarget" source="x" defaultValue="0" />
+                </Group>
+                <Group name="intervalInteractive" x="0" y="0" width="300" height="52">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <PartDraw x="0" y="0" width="300" height="20">
+                        <Line startX="39" startY="6" endX="261" endY="6">
+                            <Stroke thickness="8" color="[CONFIGURATION.themeColor.3]" cap="ROUND" />
+                        </Line>
+                    </PartDraw>
+                    <Condition>
+                        <Expressions>
+                            <Expression name="active"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] > 1]]></Expression>
+                            <!-- The app sends Paused, Off, or these two dashes outside the reminder window. -->
+                            <Expression name="noTarget"><![CDATA[[COMPLICATION.RANGED_VALUE_MAX] <= 1]]></Expression>
+                        </Expressions>
+                        <Compare expression="active">
+                            <PartDraw x="0" y="0" width="300" height="20">
+                                <Transform target="alpha" value="([COMPLICATION.RANGED_VALUE_VALUE] + [REFERENCE.intervalDelta]) &gt; [COMPLICATION.RANGED_VALUE_MIN] ? 255 : 0" />
+                                <Line startX="39" startY="6" endX="39" endY="6">
+                                    <Stroke thickness="8" color="[CONFIGURATION.themeColor.1]" cap="ROUND" />
+                                    <Transform target="endX" value="39 + 222 * clamp((([COMPLICATION.RANGED_VALUE_VALUE] + [REFERENCE.intervalDelta]) - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)" />
+                                </Line>
+                            </PartDraw>
+                            <!-- The app sends no title with RANGED_VALUE, so the target comes from the max. -->
+                            <PartText x="0" y="16" width="300" height="32">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="24" weight="MEDIUM" color="#FFFFFFFF">
+                                        <Outline color="#FF000000" width="3">
+                                            <Template><![CDATA[%s of %s]]>
+                                                <Parameter expression="[REFERENCE.intervalDelta] &gt; 0 ? numberFormat(&quot;#,##0&quot;, ([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) + [REFERENCE.intervalDelta]) : [COMPLICATION.TEXT]" />
+                                                <Parameter expression="numberFormat(&quot;#,###&quot;, [COMPLICATION.RANGED_VALUE_MAX])" />
+                                            </Template>
+                                        </Outline>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Compare>
+                        <Compare expression="noTarget">
+                            <PartText x="0" y="16" width="300" height="32">
+                                <Text align="CENTER">
+                                    <Font family="SYNC_TO_DEVICE" size="24" weight="MEDIUM" color="#FFFFFFFF">
+                                        <Outline color="#FF000000" width="3">
+                                            <Template><![CDATA[%s]]>
+                                                <Parameter expression="[COMPLICATION.TEXT]" />
+                                            </Template>
+                                        </Outline>
+                                    </Font>
+                                </Text>
+                            </PartText>
+                        </Compare>
+                    </Condition>
+                </Group>
+            </Complication>
+
+            <Complication type="SHORT_TEXT">
+                <Group name="intervalTextInteractive" x="0" y="0" width="300" height="52">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <PartDraw x="0" y="0" width="300" height="20">
+                        <Line startX="39" startY="6" endX="261" endY="6">
+                            <Stroke thickness="8" color="[CONFIGURATION.themeColor.3]" cap="ROUND" />
+                        </Line>
+                    </PartDraw>
+                    <PartText x="0" y="16" width="300" height="32">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="24" color="#FFFFFFFF">
+                                <Template><![CDATA[%s %s]]>
+                                    <Parameter expression="[COMPLICATION.TEXT]" />
+                                    <Parameter expression="[COMPLICATION.TITLE]" />
+                                </Template>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Group>
+            </Complication>
+
+            <!-- No source, which is what you get without the app: hide the gauge and say what's missing. -->
+            <Complication type="EMPTY">
+                <Group name="intervalEmptyInteractive" x="0" y="0" width="300" height="52">
+                    <Variant mode="AMBIENT" target="alpha" value="0" />
+                    <PartText x="0" y="10" width="300" height="32">
+                        <Text align="CENTER">
+                            <Font family="SYNC_TO_DEVICE" size="20" color="#FFFFFFFF">Add Hourly Steps</Font>
+                        </Text>
+                    </PartText>
+                </Group>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Date. Tied to the minute: the renderer can keep the editor's preview day after leaving it, and [DAY] alone would then not correct itself until midnight. -->
+        <Group name="date" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="178" />
+            <PartText x="0" y="46" width="450" height="30">
+                <Text align="CENTER">
+                    <Font family="SYNC_TO_DEVICE" size="22" letterSpacing="0.08" color="#FFFFFFFF">
+                        <Upper>
+                            <Template><![CDATA[%s %d]]>
+                                <Parameter expression="[DAY_OF_WEEK_S]" />
+                                <Parameter expression="[DAY] + 0 * [MINUTE]" />
+                            </Template>
+                        </Upper>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
+        <!-- Weather: condition icon, current temperature, then today's low / high. Hidden while the
+             watch has no weather data, and always-on. -->
+        <Group name="weather" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Condition>
+                <Expressions>
+                    <Expression name="hasWeather">[WEATHER.IS_AVAILABLE]</Expression>
+                </Expressions>
+                <Compare expression="hasWeather">
+                    <Group name="weatherRow" x="0" y="0" width="450" height="450">
+                        <ScreenReader stringId="reader_weather">
+                            <Parameter expression="[WEATHER.CONDITION_NAME]" />
+                            <Parameter expression="[WEATHER.TEMPERATURE]" />
+                        </ScreenReader>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="isDay">[WEATHER.IS_DAY]</Expression>
+                            </Expressions>
+                            <Compare expression="isDay">
+                            <PartText x="136" y="78" width="36" height="36">
+                                <Text align="CENTER">
+                                    <BitmapFont family="weather_day" size="36">
+                                        <Template><![CDATA[%s]]>
+                                            <Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" />
+                                        </Template>
+                                    </BitmapFont>
+                                </Text>
+                            </PartText>
+                            </Compare>
+                            <Default>
+                            <PartText x="136" y="78" width="36" height="36">
+                                <Text align="CENTER">
+                                    <BitmapFont family="weather_night" size="36">
+                                        <Template><![CDATA[%s]]>
+                                            <Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" />
+                                        </Template>
+                                    </BitmapFont>
+                                </Text>
+                            </PartText>
+                            </Default>
+                        </Condition>
+                        <PartText x="172" y="78" width="64" height="36">
+                            <Text align="CENTER">
+                                <Font family="SYNC_TO_DEVICE" size="28" weight="BOLD" color="#FFFFFFFF">
+                                    <Template><![CDATA[%d°]]>
+                                        <Parameter expression="[WEATHER.TEMPERATURE]" />
+                                    </Template>
+                                </Font>
+                            </Text>
+                        </PartText>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="hasToday">[WEATHER.DAYS.0.IS_AVAILABLE]</Expression>
+                            </Expressions>
+                            <Compare expression="hasToday">
+                                <PartText x="238" y="78" width="110" height="36">
+                                    <Text align="START">
+                                        <Font family="SYNC_TO_DEVICE" size="18" color="#FFFFFFFF">
+                                            <Template><![CDATA[%d° / %d°]]>
+                                                <Parameter expression="[WEATHER.DAYS.0.TEMPERATURE_LOW]" />
+                                                <Parameter expression="[WEATHER.DAYS.0.TEMPERATURE_HIGH]" />
+                                            </Template>
+                                        </Font>
+                                    </Text>
+                                </PartText>
+                            </Compare>
+                        </Condition>
+                    </Group>
+                </Compare>
+            </Condition>
+        </Group>
+        <!-- Heart rate, with dashes until the watch has a reading. Beside the total, or in the middle
+             when there is no total. Hidden always-on. -->
+        <Group name="heartRate" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <Transform target="x" value="[REFERENCE.noTotal] &gt; 0 ? -74 : 0" />
+            <ScreenReader stringId="reader_heart">
+                <Parameter expression="[HEART_RATE_Z]" />
+            </ScreenReader>
+            <PartImage x="272" y="333" width="22" height="22" alpha="200" tintColor="[CONFIGURATION.themeColor.1]">
+                <Image resource="ic_heart" />
+            </PartImage>
+            <PartText x="298" y="328" width="70" height="30">
+                <Text align="START">
+                    <Font family="SYNC_TO_DEVICE" size="24" weight="BOLD" color="#FFFFFFFF">
+                        <Template><![CDATA[%s]]>
+                            <Parameter expression="round([HEART_RATE]) &gt; 0 ? numberFormat(&quot;#&quot;, round([HEART_RATE])) : &quot;--&quot;" />
+                        </Template>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
+        <!-- Time: no leading zero in 12 hour mode, HH:MM in 24 hour mode. Bold white with a dark outline
+             while interactive, so it reads on the water, on the surface line and on black. Always-on it
+             is regular at 70 %, drawn opaque so the surface line stops at the digits. -->
+        <Group name="timeInteractive" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="0" />
+            <ScreenReader stringId="reader_time">
+                <Parameter expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12]" />
+                <Parameter expression="[MINUTE_Z]" />
+            </ScreenReader>
+            <PartText x="0" y="124" width="450" height="140">
+                <Text align="CENTER">
+                    <Font family="SYNC_TO_DEVICE" size="124" weight="BOLD" color="#FFFFFFFF">
+                        <Outline color="#FF000000" width="3">
+                            <Template><![CDATA[%s:%s]]>
+                                <Parameter expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12]" />
+                                <Parameter expression="[MINUTE_Z]" />
+                            </Template>
+                        </Outline>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+        <Group name="timeAmbient" x="0" y="0" width="450" height="450" alpha="0">
+            <Variant mode="AMBIENT" target="alpha" value="255" />
+            <PartText x="0" y="124" width="450" height="140">
+                <Text align="CENTER">
+                    <Font family="SYNC_TO_DEVICE" size="124" weight="NORMAL" color="#FFB2B2B2">
+                        <Template><![CDATA[%s:%s]]>
+                            <Parameter expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12]" />
+                            <Parameter expression="[MINUTE_Z]" />
+                        </Template>
+                    </Font>
+                </Text>
+            </PartText>
+        </Group>
+
+        <!-- AM/PM follows the time's right edge, which moves in with a one digit hour. -->
+        <Group name="ampm" x="0" y="0" width="450" height="450">
+            <Variant mode="AMBIENT" target="alpha" value="178" />
+            <Condition>
+                <Expressions>
+                    <Expression name="twelveHour"><![CDATA[![IS_24_HOUR_MODE]]]></Expression>
+                </Expressions>
+                <Compare expression="twelveHour">
+                    <PartText x="386" y="216" width="44" height="26">
+                        <Transform target="x" value="[HOUR_1_12] &gt;= 10 ? 386 : 358" />
+                        <Text align="START">
+                            <Font family="SYNC_TO_DEVICE" size="20" color="#FFFFFFFF">
+                                <Outline color="#FF000000" width="2">
+                                    <Template><![CDATA[%s]]>
+                                        <Parameter expression="[AMPM_STRING]" />
+                                    </Template>
+                                </Outline>
+                            </Font>
+                        </Text>
+                    </PartText>
+                </Compare>
+            </Condition>
+        </Group>
+    </Scene>
+</WatchFace>

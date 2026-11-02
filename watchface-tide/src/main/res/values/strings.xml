@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_face_name">Hourly Steps Tide</string>
+
+    <string name="slot_today">Today level</string>
+    <string name="slot_interval">Interval gauge</string>
+
+    <string name="reader_today">Today\'s steps: %1$s</string>
+    <string name="reader_interval">Steps this interval: %1$s</string>
+    <string name="reader_weather">%1$s, %2$s degrees</string>
+    <string name="reader_heart">Heart rate: %1$s</string>
+    <string name="reader_time">%1$s:%2$s</string>
+
+    <string name="segments_label">Reminder guides</string>
+
+    <string name="theme_label">Theme</string>
+    <string name="theme_violet">Violet</string>
+    <string name="theme_classic">Classic</string>
+    <string name="theme_ocean">Ocean</string>
+    <string name="theme_forest">Forest</string>
+    <string name="theme_sunset">Sunset</string>
+    <string name="theme_rose">Rose</string>
+    <string name="theme_graphite">Graphite</string>
+</resources>
