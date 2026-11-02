@@ -231,3 +231,80 @@ Not needed for this face to work, but they would improve it:
 Screenshots in [demo/](demo/) are from the two emulators. The theme and `large-active` shots use
 sample weather, heart rate and step numbers. The others are live app states, so they have no weather
 and show `--` for heart rate.
+
+## Variant: Stack
+
+A typographic take on the same data, in its own module, [watchface-stack/](watchface-stack/), with the
+package `com.hourlysteps.watchface.stack` and the label **Hourly Steps Stack**. There are no rings. The
+time is the picture, and the numbers read like a table beside it.
+
+![Stack, active](demo/stack/large-active.png) ![Stack, always-on](demo/stack/large-always-on.png)
+
+- **Time:** hours over minutes on the left, in the heaviest weight the system font has. Hours are white
+  and minutes are in the theme's `today` colour. Both are right-aligned to the column, so a one digit
+  hour leaves the space on the outer edge, and 12 hour mode has no leading zero, as on the main face.
+- **AM/PM:** turned on its side in a narrow strip beside the hours, because there is no room beside them
+  otherwise. 24 hour mode leaves the strip empty, so the column doesn't move.
+- **Column,** left-aligned, top to bottom: date, today's steps with a thin bar, "412 of 584" with a thin
+  bar in the `slot` colour, weather, heart rate. Numbers are bold and white, labels are smaller in
+  `#CAC4D0`, and the only colour is in the bars and icons.
+- **Goal met:** the total and its bar turn the goal colour, and "Goal met" appears as a last line.
+- **Reminder segments:** the same option and count as the main face, but it cuts the today bar instead
+  of a ring. A bar has two ends, so 12 reminders make 11 gaps. The gaps get thinner above 24 so the pieces
+  stay visible: at 48 the bar reads as ticks.
+- **Always-on:** the time in regular weight at 70 %, and the date, which moves down level with the gap
+  in the time. The bars are hidden with everything else, unlike the main face's thin rings.
+- **Tap a row** to open Hourly Steps. The today and interval rows are the two complication slots.
+
+| App state | Today row | Interval row |
+|---|---|---|
+| Active | shoe, "3,100", bar | "412 of 584", bar |
+| Past the interval target | as above | "1,940 of 584", full bar |
+| Daily goal met | total and full bar in the goal colour, "Goal met" at the end of the column | "412 of 584", bar |
+| Paused | "Paused", empty bar | empty bar |
+| Day off | "Off", empty bar | empty bar |
+| Outside the reminder window | shoe, total, bar | "--", empty bar |
+| App not installed | shoe, "3050", bar from the watch's own step goal | "Add Hourly Steps", no bar |
+
+The complication slots, the live `[STEP_COUNT]` numbers, the seven themes and flavors, and the renderer
+gotchas are the same as above, and its expressions are copied from the main face. Nothing was dropped.
+These differ from the main face:
+
+- The heart rate row moves up into the weather row's place while the watch has no weather.
+- The interval number is white, not the `slot` colour, so that the numbers read as one column.
+- The preview and flavor icons are new screenshots of this design.
+
+To build and install it, with the app installed first:
+
+```bash
+./gradlew :watchface-stack:check assembleDebug
+```
+
+```bash
+adb install -r watchface-stack/build/outputs/apk/debug/watchface-stack-debug.apk
+```
+
+```bash
+adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SURFACE --es operation set-watchface --es watchFaceId com.hourlysteps.watchface.stack
+```
+
+Or long-press the current face and pick **Hourly Steps Stack**. `tools/validate.*` only look at the
+main face, so run the same two Google jars on this module's XML and APK by hand.
+
+Tested on the 384 and 454 emulators with Hourly Steps from `feature_uncapped_complications`, not yet on
+a Pixel Watch 4. So the weight and width of the watch's own system font are unchecked, along with the
+live count, which reads 0 on the emulators. Nothing lit comes closer than 23 units to the round edge in
+the screenshots, so the time has some room if the watch's digits come out wider.
+
+Screenshots are in [demo/stack/](demo/stack/). `large-off`, `large-paused`, `small-paused`,
+`large-outside-window` and `small-fallback-no-app` are live app states, so they have no weather and show
+`--` for heart rate. The others use sample weather, heart rate and step numbers.
+
+| | 454 | 384 |
+|---|---|---|
+| Goal met | ![](demo/stack/large-goal-met.png) | ![](demo/stack/small-goal-met.png) |
+| Paused | ![](demo/stack/large-paused.png) | ![](demo/stack/small-paused.png) |
+| 24 hour | ![](demo/stack/large-24-hour.png) | ![](demo/stack/small-24-hour.png) |
+| Forest | ![](demo/stack/large-theme-forest.png) | ![](demo/stack/small-theme-forest.png) |
+| Sunset | ![](demo/stack/large-theme-sunset.png) | ![](demo/stack/small-theme-sunset.png) |
+| Segments | ![](demo/stack/large-segments-12.png) | ![](demo/stack/small-segments-24.png) |
