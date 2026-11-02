@@ -253,6 +253,8 @@ water rising up the round face, and the day's goal is the brim. It installs besi
   says "Add Hourly Steps".
 - **Today's total and heart rate:** share a row above the bottom of the water. Weather and the date are
   at the top. With no total to show, the heart rate moves to the middle of the row.
+- **Battery:** the charge level as a percentage under that row, beside a small battery that fills to
+  match, so the number can't be read as step progress.
 - **Reminder guides (optional):** tick marks up both walls at each reminder's share of the goal, like a
   measuring jug. They follow the same rules as the main face's segments: on in **Other options** in the
   editor, and gone when there is no count to work out or once the goal is met.
