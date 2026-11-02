@@ -35,8 +35,26 @@ app, it keeps the fallback below until you remove and re-add it, or pick the sou
 | Outside the reminder window | inner ring empty | the total, and "--" under it |
 | App not installed | outer track from the watch's own step goal, inner ring hidden | "3050", "Add Hourly Steps" |
 
-The numbers update when the app sends them: at most once a minute while you walk and every 5 minutes
-otherwise, the same as the app's tile.
+The app sends its numbers at most once a minute while you walk and every 5 minutes otherwise, the same
+as its tile. The face doesn't wait for them while the watch has a live count, see below.
+
+## Live step numbers
+
+The watch's own count (`[STEP_COUNT]`) changed every 1 to 3 seconds during a walk on a Pixel Watch 4,
+so the face uses it to keep up between the app's updates:
+
+- **Total and outer ring:** follow the watch's count, and the goal colour shows as soon as it reaches
+  the goal. The app's number is used if the watch's count is behind it, which also covers the emulators,
+  where the count reads 0.
+- **Interval number and inner ring:** the app's value plus the steps the watch has counted since the
+  app's last update.
+- **Above the interval target or the daily goal:** the interval number comes from the app alone, so it
+  moves once a minute. The app caps the values it sends at those limits, and the face can't do sums on
+  the text, so it can't tell how far past them you are.
+- **The counts disagree by more than 300:** the interval number comes from the app alone.
+
+The two counts are kept separately, so they can differ by a few steps. Any difference shows in the total
+and in the interval number. It was 9 on the watch tested, the same before and after a walk of over 300 steps.
 
 ## Weather and heart rate
 
@@ -168,7 +186,7 @@ scroll --axis SCROLL,-1`, and renderer errors show up here:
 adb logcat --pid=$(adb shell pidof -s com.google.wear.watchface.runtime)
 ```
 
-The emulators have no weather source and report a heart rate of 0, so these two only show live data
+The emulators have no weather source and report a heart rate and step count of 0, so these only show live data
 on a real watch. To test their layout, temporarily replace the `[WEATHER.*]` and `[HEART_RATE]`
 sources in `watchface.xml` with fixed values, and put them back before committing.
 
@@ -206,6 +224,10 @@ Not needed for this face to work, but they would improve it:
    then, so reminder segments disappear after the last reminder of the day. With the real target as
    the max and `--` as the text, the face could keep them showing all day. The face would also need a
    small change: it treats a max above 1 as active, and would have to check for `--` as well.
+
+3. **Send the uncapped interval count.** The interval source caps its value at the target, so the face
+   can't keep the number live past it. The face's `intervalDelta` would also have to stop treating a
+   value at the max as capped.
 
 ## Demo
 
