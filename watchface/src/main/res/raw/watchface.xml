@@ -738,7 +738,7 @@
             </BooleanOption>
         </BooleanConfiguration>
 
-        <!-- Date. -->
+        <!-- Date. Tied to the minute: the renderer can keep the editor's preview day after leaving it, and [DAY] alone would then not correct itself until midnight. -->
         <Group name="date" x="0" y="0" width="450" height="450">
             <Variant mode="AMBIENT" target="alpha" value="178" />
             <PartText x="0" y="52" width="450" height="30">
@@ -747,7 +747,7 @@
                         <Upper>
                             <Template><![CDATA[%s %d]]>
                                 <Parameter expression="[DAY_OF_WEEK_S]" />
-                                <Parameter expression="[DAY]" />
+                                <Parameter expression="[DAY] + 0 * [MINUTE]" />
                             </Template>
                         </Upper>
                     </Font>
